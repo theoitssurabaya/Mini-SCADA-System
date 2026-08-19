@@ -1,0 +1,1712 @@
+[
+    {
+        "id": "f6dc036d698044b2",
+        "type": "tab",
+        "label": "Raspberry System",
+        "disabled": true,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "16249660aba1532f",
+        "type": "trigger",
+        "z": "f6dc036d698044b2",
+        "name": "",
+        "op1": "true",
+        "op2": "false",
+        "op1type": "bool",
+        "op2type": "bool",
+        "duration": "250",
+        "extend": false,
+        "overrideDelay": false,
+        "units": "ms",
+        "reset": "",
+        "bytopic": "all",
+        "topic": "topic",
+        "outputs": 1,
+        "x": 580,
+        "y": 260,
+        "wires": [
+            [
+                "1e8490cca63e1acd"
+            ]
+        ]
+    },
+    {
+        "id": "44914c3dd5ec7122",
+        "type": "function",
+        "z": "f6dc036d698044b2",
+        "name": "Extract System Status",
+        "func": "return [\n  { payload: msg.payload[0] }, // Output 1: Safety Latch Bit -> Wire to \"Safety Lockout\" template\n  { payload: msg.payload[1] }, // Output 2: Motor 1 Running Bit -> Wire to existing red \"led\"\n  { payload: msg.payload[2] }  // Output 3: Motor 2 Running Bit -> Wire to a NEW ui_led widget!\n];",
+        "outputs": 3,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1300,
+        "y": 260,
+        "wires": [
+            [
+                "7372f061967da169"
+            ],
+            [
+                "c79bd64f55663cb2"
+            ],
+            [
+                "3ff88544c2f9dfd1"
+            ]
+        ]
+    },
+    {
+        "id": "43711f45827ace44",
+        "type": "function",
+        "z": "f6dc036d698044b2",
+        "name": "Extract Field Button Status",
+        "func": "// Extract the value from the Modbus array\nlet state = msg.payload;\nif (Array.isArray(state)) {\n    state = state[0];\n}\n\n// Translate to text and HP-HMI colors\nif (state === true || state === \"true\" || state === 1) {\n    msg.text = \"Field Override Active\";\n    msg.color = \"#3399ff\"; // Industrial Blue\n} else {\n    msg.text = \"Field Standby\";\n    msg.color = \"#555555\"; // Muted Grey\n}\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1320,
+        "y": 360,
+        "wires": [
+            [
+                "b0289559d9c3ec21"
+            ]
+        ]
+    },
+    {
+        "id": "6fb6c9d80b592217",
+        "type": "function",
+        "z": "f6dc036d698044b2",
+        "name": "Scale to Float (°C)",
+        "func": "// Extract the first 16-bit integer from the incoming Modbus payload array\nlet rawInteger = msg.payload[0];\n\n// Reverse the x100 integer scaling applied by your remote RTU\nmsg.payload = rawInteger / 100;\n\nmsg.topic = \"Temperature\";\n\n// Pass the scaled floating-point temperature to the HMI dashboard\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 3730,
+        "y": 280,
+        "wires": [
+            [
+                "af4ff79633889fef",
+                "7d3be01c052669d4",
+                "3b411215b9f0010f",
+                "b158d34842e66a0f",
+                "719986499b044c56"
+            ]
+        ]
+    },
+    {
+        "id": "28aff2d1979e9bbe",
+        "type": "function",
+        "z": "f6dc036d698044b2",
+        "name": "Get Motor 1 Speed",
+        "func": "let speed = msg.payload[0];\nlet running = flow.get('motor1Running') || false;\nlet statusColor = running ? \"#2E8B57\" : \"#808080\";\nlet dirLabel = flow.get('motor1Dir') ? \" REV\" : \" FWD\";\n\nmsg.payload = speed + \" RPM\" + dirLabel;\nmsg.color = statusColor;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2130,
+        "y": 440,
+        "wires": [
+            [
+                "5260099e08be5429"
+            ]
+        ]
+    },
+    {
+        "id": "cbaadbc4c0872198",
+        "type": "function",
+        "z": "f6dc036d698044b2",
+        "name": "Get Motor 2 Speed",
+        "func": "let speed = msg.payload[0];\nlet running = flow.get('motor2Running') || false;\nlet statusColor = running ? \"#2E8B57\" : \"#808080\";\nlet dirLabel = flow.get('motor2Dir') ? \" REV\" : \" FWD\";\n\nmsg.payload = speed + \" RPM\" + dirLabel;\nmsg.color = statusColor;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2750,
+        "y": 380,
+        "wires": [
+            [
+                "91ca372a0c140906"
+            ]
+        ]
+    },
+    {
+        "id": "65591af6fd1cca84",
+        "type": "function",
+        "z": "f6dc036d698044b2",
+        "name": "Store Motor 1 Speed",
+        "func": "flow.set('motor1Running', msg.payload[0]);\nreturn null;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2180,
+        "y": 500,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "fcad6346b0b3e9f5",
+        "type": "function",
+        "z": "f6dc036d698044b2",
+        "name": "Store Motor 2 Speed",
+        "func": "flow.set('motor2Running', msg.payload[0]);\nreturn null;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2760,
+        "y": 440,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "9569e1ff398b5da0",
+        "type": "function",
+        "z": "f6dc036d698044b2",
+        "name": "Store Motor 1 Direction",
+        "func": "flow.set('motor1Dir', msg.payload[0]);\nreturn null;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2190,
+        "y": 320,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "89530ddf349722b6",
+        "type": "function",
+        "z": "f6dc036d698044b2",
+        "name": "Store Motor 2 Direction",
+        "func": "flow.set('motor2Dir', msg.payload[0]);\nreturn null;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2810,
+        "y": 320,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "e596b8f22c39f336",
+        "type": "comment",
+        "z": "f6dc036d698044b2",
+        "name": "Emergency Interlocks",
+        "info": "",
+        "x": 580,
+        "y": 140,
+        "wires": []
+    },
+    {
+        "id": "3c5a7ffd177aeae5",
+        "type": "comment",
+        "z": "f6dc036d698044b2",
+        "name": "Global CSS Template",
+        "info": "",
+        "x": 160,
+        "y": 140,
+        "wires": []
+    },
+    {
+        "id": "3e7f7a08150e0646",
+        "type": "comment",
+        "z": "f6dc036d698044b2",
+        "name": "Motor 1 Controls",
+        "info": "",
+        "x": 2060,
+        "y": 140,
+        "wires": []
+    },
+    {
+        "id": "4ceed99c6f6d609e",
+        "type": "comment",
+        "z": "f6dc036d698044b2",
+        "name": "Field Status",
+        "info": "",
+        "x": 1310,
+        "y": 140,
+        "wires": []
+    },
+    {
+        "id": "34c0fb710ac231c9",
+        "type": "comment",
+        "z": "f6dc036d698044b2",
+        "name": "Temperature Data",
+        "info": "",
+        "x": 3750,
+        "y": 140,
+        "wires": []
+    },
+    {
+        "id": "1b4b5f69843e949c",
+        "type": "http request",
+        "z": "f6dc036d698044b2",
+        "name": "",
+        "method": "POST",
+        "ret": "txt",
+        "paytoqs": "ignore",
+        "url": "http://iotdb:18080/rest/v1/insertTablet",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 4270,
+        "y": 240,
+        "wires": [
+            [
+                "5ed8f52ed80d2b89"
+            ]
+        ]
+    },
+    {
+        "id": "3b411215b9f0010f",
+        "type": "function",
+        "z": "f6dc036d698044b2",
+        "name": "Format for IoTDB",
+        "func": "// Capture the scaled float temperature directly from the input wire\nlet scaledTemperature = msg.payload; \n\n// Construct the official Apache IoTDB REST v1 payload block\nmsg.payload = {\n    \"deviceId\": \"root.scada_mini_lab.field_sensors\",\n    \"isAligned\": false, // Tells IoTDB this is a standard independent timeseries\n    \"timestamps\": [ Date.now() ],\n    \"measurements\": [ \"temperature\" ],\n    \"dataTypes\": [ \"FLOAT\" ],\n    \"values\": [ [ scaledTemperature ] ]\n};\n\n// Map standard Authorization credentials\nmsg.headers = {\n    \"Authorization\": \"Basic cm9vdDpyb290\", // Base64 signature for root:root\n    \"Content-Type\": \"application/json\"\n};\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 4070,
+        "y": 240,
+        "wires": [
+            [
+                "1b4b5f69843e949c"
+            ]
+        ]
+    },
+    {
+        "id": "ca11ad01f029ec34",
+        "type": "comment",
+        "z": "f6dc036d698044b2",
+        "name": "Motor 2 Controls",
+        "info": "",
+        "x": 2680,
+        "y": 140,
+        "wires": []
+    },
+    {
+        "id": "a5716e26d969fe4a",
+        "type": "comment",
+        "z": "f6dc036d698044b2",
+        "name": "Network Diagnostics",
+        "info": "",
+        "x": 4690,
+        "y": 140,
+        "wires": []
+    },
+    {
+        "id": "34cbb387f1f957d1",
+        "type": "inject",
+        "z": "f6dc036d698044b2",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "60",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "0.1",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 3210,
+        "y": 420,
+        "wires": [
+            [
+                "b158d34842e66a0f"
+            ]
+        ]
+    },
+    {
+        "id": "3c5f671e9f73fe8a",
+        "type": "http request",
+        "z": "f6dc036d698044b2",
+        "name": "",
+        "method": "POST",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "http://iotdb:18080/rest/v1/query",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [
+            {
+                "keyType": "Authorization",
+                "keyValue": "",
+                "valueType": "other",
+                "valueValue": "Basic cm9vdDpyb290"
+            },
+            {
+                "keyType": "Content-Type",
+                "keyValue": "",
+                "valueType": "other",
+                "valueValue": "application/json"
+            }
+        ],
+        "x": 3610,
+        "y": 360,
+        "wires": [
+            [
+                "741d664499cbf2d3",
+                "dacf546635f8c726"
+            ]
+        ]
+    },
+    {
+        "id": "b158d34842e66a0f",
+        "type": "function",
+        "z": "f6dc036d698044b2",
+        "name": "Build IoTDB Query",
+        "func": "// Capture new selection from dropdown OR recall saved active range\nlet range = msg.payload;\n\nif (typeof range !== 'string' || (!range.endsWith('m') && !range.endsWith('h'))) {\n    range = flow.get('selectedTimeRange') || \"15m\";\n} else {\n    flow.set('selectedTimeRange', range);\n}\n\nlet timeOffsetMs = 15 * 60 * 1000;\nlet rowLimit = 1000;\nlet rangeLabel = \"15M\";\n\nif (range === \"1h\") {\n    timeOffsetMs = 60 * 60 * 1000;\n    rowLimit = 3600;\n    rangeLabel = \"1H\";\n} else if (range === \"6h\") {\n    timeOffsetMs = 6 * 60 * 60 * 1000;\n    rowLimit = 5000;\n    rangeLabel = \"6H\";\n} else if (range === \"24h\") {\n    timeOffsetMs = 24 * 60 * 60 * 1000;\n    rowLimit = 5000;\n    rangeLabel = \"24H\";\n}\n\nlet startTime = Date.now() - timeOffsetMs;\nmsg.startTime = startTime;\nmsg.rangeLabel = rangeLabel;\n\nmsg.payload = {\n    \"sql\": `SELECT temperature FROM root.scada_mini_lab.field_sensors WHERE time >= ${startTime} ORDER BY time DESC LIMIT ${rowLimit}`\n};\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 3410,
+        "y": 360,
+        "wires": [
+            [
+                "3c5f671e9f73fe8a"
+            ]
+        ]
+    },
+    {
+        "id": "741d664499cbf2d3",
+        "type": "function",
+        "z": "f6dc036d698044b2",
+        "name": "Format for Chart History",
+        "func": "let timestamps = msg.payload.timestamps || [];\n// Flatten IoTDB's nested array response structure\nlet rawValues = msg.payload.values ? msg.payload.values.flat(Infinity) : [];\n\nlet chartData = [];\n\nfor (let i = 0; i < timestamps.length; i++) {\n    let val = parseFloat(rawValues[i]);\n    \n    // Filter out offline zeroes (0.00) and sensor power-on error spikes (85.00+)\n    if (!isNaN(val) && val > 0 && val < 85) {\n        chartData.push({\n            x: timestamps[i],\n            y: parseFloat(val.toFixed(2))\n        });\n    }\n}\n\n// Re-order chronologically (oldest to newest)\nchartData.reverse();\n\n// Anchor time range start point if needed\nif (msg.startTime && chartData.length > 0) {\n    if (chartData[0].x > msg.startTime + 5000) {\n        chartData.unshift({\n            x: msg.startTime,\n            y: chartData[0].y\n        });\n    }\n}\n\nlet clearMsg = { payload: [] };\nlet updateMsg = {\n    payload: [{\n        \"series\": [\"Temperature\"],\n        \"data\": [chartData],\n        \"labels\": [\"Temperature\"]\n    }]\n};\n\nreturn [[ clearMsg, updateMsg ]];",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 3830,
+        "y": 360,
+        "wires": [
+            [
+                "7d3be01c052669d4"
+            ]
+        ]
+    },
+    {
+        "id": "dacf546635f8c726",
+        "type": "function",
+        "z": "f6dc036d698044b2",
+        "name": "Format Stats",
+        "func": "let avgVal = \"--\";\nlet maxVal = \"--\";\nlet minVal = \"--\";\nlet rangeLabel = msg.rangeLabel || \"RANGE\";\n\nif (msg.payload && msg.payload.values && msg.payload.values.length > 0) {\n    let numbers = [];\n\n    // Flatten IoTDB's nested column array\n    let flatValues = msg.payload.values.flat(Infinity);\n\n    for (let i = 0; i < flatValues.length; i++) {\n        let val = parseFloat(flatValues[i]);\n\n        // Filter out offline zeroes (0.00) and sensor power-on error spikes (85.00+)\n        if (!isNaN(val) && val > 0 && val < 85) {\n            numbers.push(val);\n        }\n    }\n\n    // Compute true operational metrics\n    if (numbers.length > 0) {\n        let sum = numbers.reduce((acc, curr) => acc + curr, 0);\n        let avg = sum / numbers.length;\n        let max = Math.max(...numbers);\n        let min = Math.min(...numbers);\n\n        avgVal = avg.toFixed(2);\n        maxVal = max.toFixed(2);\n        minVal = min.toFixed(2);\n    }\n}\n\nmsg.payload = {\n    avg: avgVal,\n    max: maxVal,\n    min: minVal,\n    label: rangeLabel\n};\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 3790,
+        "y": 420,
+        "wires": [
+            [
+                "87b3b3bcbcd668bd"
+            ]
+        ]
+    },
+    {
+        "id": "719986499b044c56",
+        "type": "function",
+        "z": "f6dc036d698044b2",
+        "name": "Format Temp Alarm",
+        "func": "// Extract floating-point temperature reading\nlet temp = parseFloat(msg.payload);\n\nlet statusState = \"NOMINAL\";\nlet statusText = \"NOMINAL PROCESS TEMPERATURE\";\nlet bgColor = \"#2e8b57\"; // Muted Industrial Green\nlet textColor = \"#ffffff\";\nlet isFlashing = false;\n\n// Evaluate temperature thresholds according to PLC thermal curve\nif (isNaN(temp) || temp <= 0 || temp >= 85) {\n    statusState = \"SENSOR FAULT\";\n    statusText = \"SENSOR SIGNAL DISCONNECTED / FAULT\";\n    bgColor = \"#808080\"; // Grey\n} else if (temp >= 40.0) {\n    statusState = \"CRITICAL ALARM\";\n    statusText = \"HIGH TEMP ALARM: MOTOR 2 MAX SPEED (100 RPM)\";\n    bgColor = \"#dc3545\"; // Warning Red\n    isFlashing = true;\n} else if (temp >= 30.0) {\n    statusState = \"WARNING\";\n    statusText = \"THERMAL RAMP ACTIVE: MOTOR 2 ACCELERATING\";\n    bgColor = \"#e0a72f\"; // Amber / Yellow\n}\n\nmsg.payload = {\n    temp: temp.toFixed(2),\n    state: statusState,\n    text: statusText,\n    bgColor: bgColor,\n    textColor: textColor,\n    flash: isFlashing\n};\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 4070,
+        "y": 200,
+        "wires": [
+            [
+                "81902e7efc19e43a"
+            ]
+        ]
+    },
+    {
+        "id": "5ed8f52ed80d2b89",
+        "type": "function",
+        "z": "f6dc036d698044b2",
+        "name": "Check IoTDB Status",
+        "func": "// Check HTTP response code from Apache IoTDB REST API\n// statusCode 200 or 202 = Success\nlet statusCode = msg.statusCode || (msg.res ? msg.res.statusCode : null);\n\nif (statusCode === 200 || statusCode === 202) {\n    // Database ingestion is working normally\n    msg.payload = true;\n    msg.topic = \"Historian Logging OK\";\n} else {\n    // Database connection failed, endpoint unreachable, or internal error\n    msg.payload = false;\n    msg.topic = \"Database Failure\";\n}\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 4600,
+        "y": 260,
+        "wires": [
+            [
+                "ce50de5a18c56972"
+            ]
+        ]
+    },
+    {
+        "id": "2fa4dbab49acab34",
+        "type": "modbus-read",
+        "z": "f6dc036d698044b2",
+        "name": "",
+        "topic": "",
+        "showStatusActivities": false,
+        "logIOActivities": false,
+        "showErrors": false,
+        "showWarnings": true,
+        "unitid": "1",
+        "dataType": "Coil",
+        "adr": "4",
+        "quantity": "3",
+        "rate": "500",
+        "rateUnit": "ms",
+        "delayOnStart": false,
+        "enableDeformedMessages": false,
+        "startDelayTime": "",
+        "server": "e58cbab20f12d36f",
+        "useIOFile": false,
+        "ioFile": "",
+        "useIOForPayload": false,
+        "emptyMsgOnFail": false,
+        "x": 1090,
+        "y": 260,
+        "wires": [
+            [
+                "44914c3dd5ec7122"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "60c9fd6cd6c17a6d",
+        "type": "modbus-read",
+        "z": "f6dc036d698044b2",
+        "name": "",
+        "topic": "",
+        "showStatusActivities": false,
+        "logIOActivities": false,
+        "showErrors": false,
+        "showWarnings": true,
+        "unitid": "1",
+        "dataType": "Coil",
+        "adr": "7",
+        "quantity": "1",
+        "rate": "500",
+        "rateUnit": "ms",
+        "delayOnStart": false,
+        "enableDeformedMessages": false,
+        "startDelayTime": "",
+        "server": "e58cbab20f12d36f",
+        "useIOFile": false,
+        "ioFile": "",
+        "useIOForPayload": false,
+        "emptyMsgOnFail": false,
+        "x": 1090,
+        "y": 360,
+        "wires": [
+            [
+                "43711f45827ace44"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "00092c2133cd1ee3",
+        "type": "modbus-read",
+        "z": "f6dc036d698044b2",
+        "name": "",
+        "topic": "",
+        "showStatusActivities": false,
+        "logIOActivities": false,
+        "showErrors": false,
+        "showWarnings": true,
+        "unitid": "1",
+        "dataType": "HoldingRegister",
+        "adr": "1024",
+        "quantity": "1",
+        "rate": "1000",
+        "rateUnit": "ms",
+        "delayOnStart": false,
+        "enableDeformedMessages": false,
+        "startDelayTime": "",
+        "server": "e58cbab20f12d36f",
+        "useIOFile": false,
+        "ioFile": "",
+        "useIOForPayload": false,
+        "emptyMsgOnFail": false,
+        "x": 3530,
+        "y": 280,
+        "wires": [
+            [
+                "6fb6c9d80b592217"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "7a66900d58e41d9f",
+        "type": "modbus-read",
+        "z": "f6dc036d698044b2",
+        "name": "",
+        "topic": "",
+        "showStatusActivities": false,
+        "logIOActivities": false,
+        "showErrors": false,
+        "showWarnings": true,
+        "unitid": "1",
+        "dataType": "HoldingRegister",
+        "adr": "1025",
+        "quantity": "1",
+        "rate": "500",
+        "rateUnit": "ms",
+        "delayOnStart": false,
+        "enableDeformedMessages": false,
+        "startDelayTime": "",
+        "server": "e58cbab20f12d36f",
+        "useIOFile": false,
+        "ioFile": "",
+        "useIOForPayload": false,
+        "emptyMsgOnFail": false,
+        "x": 1930,
+        "y": 440,
+        "wires": [
+            [
+                "28aff2d1979e9bbe"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "13a217100cc48e9b",
+        "type": "modbus-read",
+        "z": "f6dc036d698044b2",
+        "name": "",
+        "topic": "",
+        "showStatusActivities": false,
+        "logIOActivities": false,
+        "showErrors": false,
+        "showWarnings": true,
+        "unitid": "1",
+        "dataType": "HoldingRegister",
+        "adr": "1026",
+        "quantity": "1",
+        "rate": "500",
+        "rateUnit": "ms",
+        "delayOnStart": false,
+        "enableDeformedMessages": false,
+        "startDelayTime": "",
+        "server": "e58cbab20f12d36f",
+        "useIOFile": false,
+        "ioFile": "",
+        "useIOForPayload": false,
+        "emptyMsgOnFail": false,
+        "x": 2550,
+        "y": 380,
+        "wires": [
+            [
+                "cbaadbc4c0872198"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "8997000df1d3138f",
+        "type": "modbus-read",
+        "z": "f6dc036d698044b2",
+        "name": "",
+        "topic": "",
+        "showStatusActivities": false,
+        "logIOActivities": false,
+        "showErrors": false,
+        "showWarnings": true,
+        "unitid": "1",
+        "dataType": "Coil",
+        "adr": "5",
+        "quantity": "1",
+        "rate": "500",
+        "rateUnit": "ms",
+        "delayOnStart": false,
+        "enableDeformedMessages": false,
+        "startDelayTime": "",
+        "server": "e58cbab20f12d36f",
+        "useIOFile": false,
+        "ioFile": "",
+        "useIOForPayload": false,
+        "emptyMsgOnFail": false,
+        "x": 1970,
+        "y": 500,
+        "wires": [
+            [
+                "65591af6fd1cca84"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "6b32f3acbf902dfc",
+        "type": "modbus-read",
+        "z": "f6dc036d698044b2",
+        "name": "",
+        "topic": "",
+        "showStatusActivities": false,
+        "logIOActivities": false,
+        "showErrors": false,
+        "showWarnings": true,
+        "unitid": "1",
+        "dataType": "Coil",
+        "adr": "6",
+        "quantity": "1",
+        "rate": "500",
+        "rateUnit": "ms",
+        "delayOnStart": false,
+        "enableDeformedMessages": false,
+        "startDelayTime": "",
+        "server": "e58cbab20f12d36f",
+        "useIOFile": false,
+        "ioFile": "",
+        "useIOForPayload": false,
+        "emptyMsgOnFail": false,
+        "x": 2550,
+        "y": 440,
+        "wires": [
+            [
+                "fcad6346b0b3e9f5"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "4afe4675fd12a69f",
+        "type": "modbus-read",
+        "z": "f6dc036d698044b2",
+        "name": "",
+        "topic": "",
+        "showStatusActivities": false,
+        "logIOActivities": false,
+        "showErrors": false,
+        "showWarnings": true,
+        "unitid": "1",
+        "dataType": "Coil",
+        "adr": "10",
+        "quantity": "1",
+        "rate": "500",
+        "rateUnit": "ms",
+        "delayOnStart": false,
+        "enableDeformedMessages": false,
+        "startDelayTime": "",
+        "server": "e58cbab20f12d36f",
+        "useIOFile": false,
+        "ioFile": "",
+        "useIOForPayload": false,
+        "emptyMsgOnFail": false,
+        "x": 1970,
+        "y": 320,
+        "wires": [
+            [
+                "9569e1ff398b5da0"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "e5e3bc92297b1737",
+        "type": "modbus-read",
+        "z": "f6dc036d698044b2",
+        "name": "",
+        "topic": "",
+        "showStatusActivities": false,
+        "logIOActivities": false,
+        "showErrors": false,
+        "showWarnings": true,
+        "unitid": "1",
+        "dataType": "Coil",
+        "adr": "11",
+        "quantity": "1",
+        "rate": "500",
+        "rateUnit": "ms",
+        "delayOnStart": false,
+        "enableDeformedMessages": false,
+        "startDelayTime": "",
+        "server": "e58cbab20f12d36f",
+        "useIOFile": false,
+        "ioFile": "",
+        "useIOForPayload": false,
+        "emptyMsgOnFail": false,
+        "x": 2590,
+        "y": 320,
+        "wires": [
+            [
+                "89530ddf349722b6"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "2263b534428164ab",
+        "type": "modbus-write",
+        "z": "f6dc036d698044b2",
+        "name": "",
+        "showStatusActivities": false,
+        "showErrors": false,
+        "showWarnings": true,
+        "unitid": "1",
+        "dataType": "Coil",
+        "adr": "8",
+        "quantity": "1",
+        "server": "e58cbab20f12d36f",
+        "emptyMsgOnFail": false,
+        "keepMsgProperties": false,
+        "delayOnStart": false,
+        "startDelayTime": "",
+        "x": 2160,
+        "y": 200,
+        "wires": [
+            [],
+            []
+        ]
+    },
+    {
+        "id": "184464b87b09d7f5",
+        "type": "modbus-write",
+        "z": "f6dc036d698044b2",
+        "name": "",
+        "showStatusActivities": false,
+        "showErrors": false,
+        "showWarnings": true,
+        "unitid": "1",
+        "dataType": "Coil",
+        "adr": "1",
+        "quantity": "1",
+        "server": "e58cbab20f12d36f",
+        "emptyMsgOnFail": false,
+        "keepMsgProperties": false,
+        "delayOnStart": false,
+        "startDelayTime": "",
+        "x": 640,
+        "y": 200,
+        "wires": [
+            [],
+            []
+        ]
+    },
+    {
+        "id": "1e8490cca63e1acd",
+        "type": "modbus-write",
+        "z": "f6dc036d698044b2",
+        "name": "",
+        "showStatusActivities": false,
+        "showErrors": false,
+        "showWarnings": true,
+        "unitid": "1",
+        "dataType": "Coil",
+        "adr": "2",
+        "quantity": "1",
+        "server": "e58cbab20f12d36f",
+        "emptyMsgOnFail": false,
+        "keepMsgProperties": false,
+        "delayOnStart": false,
+        "startDelayTime": "",
+        "x": 780,
+        "y": 260,
+        "wires": [
+            [],
+            []
+        ]
+    },
+    {
+        "id": "80c35e25fcdafab1",
+        "type": "modbus-write",
+        "z": "f6dc036d698044b2",
+        "name": "",
+        "showStatusActivities": false,
+        "showErrors": false,
+        "showWarnings": true,
+        "unitid": "1",
+        "dataType": "Coil",
+        "adr": "9",
+        "quantity": "1",
+        "server": "e58cbab20f12d36f",
+        "emptyMsgOnFail": false,
+        "keepMsgProperties": false,
+        "delayOnStart": false,
+        "startDelayTime": "",
+        "x": 2780,
+        "y": 200,
+        "wires": [
+            [],
+            []
+        ]
+    },
+    {
+        "id": "451054e4684efc9c",
+        "type": "modbus-write",
+        "z": "f6dc036d698044b2",
+        "name": "",
+        "showStatusActivities": false,
+        "showErrors": false,
+        "showWarnings": true,
+        "unitid": "1",
+        "dataType": "HoldingRegister",
+        "adr": "1025",
+        "quantity": "1",
+        "server": "e58cbab20f12d36f",
+        "emptyMsgOnFail": false,
+        "keepMsgProperties": false,
+        "delayOnStart": false,
+        "startDelayTime": "",
+        "x": 2160,
+        "y": 380,
+        "wires": [
+            [],
+            []
+        ]
+    },
+    {
+        "id": "286089539fafdeda",
+        "type": "modbus-write",
+        "z": "f6dc036d698044b2",
+        "name": "",
+        "showStatusActivities": false,
+        "showErrors": false,
+        "showWarnings": true,
+        "unitid": "1",
+        "dataType": "Coil",
+        "adr": "10",
+        "quantity": "1",
+        "server": "e58cbab20f12d36f",
+        "emptyMsgOnFail": false,
+        "keepMsgProperties": false,
+        "delayOnStart": false,
+        "startDelayTime": "",
+        "x": 2160,
+        "y": 260,
+        "wires": [
+            [],
+            []
+        ]
+    },
+    {
+        "id": "6348c1f2fb24c6d9",
+        "type": "modbus-write",
+        "z": "f6dc036d698044b2",
+        "name": "",
+        "showStatusActivities": false,
+        "showErrors": false,
+        "showWarnings": true,
+        "unitid": "1",
+        "dataType": "Coil",
+        "adr": "11",
+        "quantity": "1",
+        "server": "e58cbab20f12d36f",
+        "emptyMsgOnFail": false,
+        "keepMsgProperties": false,
+        "delayOnStart": false,
+        "startDelayTime": "",
+        "x": 2780,
+        "y": 260,
+        "wires": [
+            [],
+            []
+        ]
+    },
+    {
+        "id": "09605d4ba23a201f",
+        "type": "ui_button",
+        "z": "f6dc036d698044b2",
+        "name": "",
+        "group": "8ea868a8dba72bdb",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "label": "Safety Reset",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "",
+        "payload": "",
+        "payloadType": "str",
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 390,
+        "y": 260,
+        "wires": [
+            [
+                "16249660aba1532f"
+            ]
+        ]
+    },
+    {
+        "id": "9bcd3b3e9342bad8",
+        "type": "ui_dropdown",
+        "z": "f6dc036d698044b2",
+        "name": "Time Window Selector",
+        "label": "Time Range",
+        "tooltip": "",
+        "place": "Select option",
+        "group": "478a2351ed3434a5",
+        "order": 3,
+        "width": 0,
+        "height": 0,
+        "passthru": true,
+        "multiple": false,
+        "options": [
+            {
+                "label": "Last 15 Minutes",
+                "value": "15m",
+                "type": "str"
+            },
+            {
+                "label": "Last 1 Hour",
+                "value": "1h",
+                "type": "str"
+            },
+            {
+                "label": "Last 6 Hours",
+                "value": "6h",
+                "type": "str"
+            },
+            {
+                "label": "Last 24 Hours",
+                "value": "24h",
+                "type": "str"
+            }
+        ],
+        "payload": "",
+        "topic": "topic",
+        "topicType": "msg",
+        "className": "",
+        "x": 3180,
+        "y": 360,
+        "wires": [
+            [
+                "b158d34842e66a0f"
+            ]
+        ]
+    },
+    {
+        "id": "77d2ea046381eef0",
+        "type": "ui_switch",
+        "z": "f6dc036d698044b2",
+        "name": "",
+        "label": "Enable",
+        "tooltip": "",
+        "group": "c9abd556f5784a80",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "passthru": true,
+        "decouple": "false",
+        "topic": "topic",
+        "topicType": "msg",
+        "style": "",
+        "onvalue": "true",
+        "onvalueType": "bool",
+        "onicon": "",
+        "oncolor": "",
+        "offvalue": "false",
+        "offvalueType": "bool",
+        "officon": "",
+        "offcolor": "",
+        "animate": false,
+        "className": "motor-enable-switch",
+        "x": 1980,
+        "y": 200,
+        "wires": [
+            [
+                "2263b534428164ab"
+            ]
+        ]
+    },
+    {
+        "id": "35edaa16dc68522f",
+        "type": "ui_switch",
+        "z": "f6dc036d698044b2",
+        "name": "",
+        "label": "E-Stop",
+        "tooltip": "",
+        "group": "8ea868a8dba72bdb",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "passthru": true,
+        "decouple": "false",
+        "topic": "topic",
+        "topicType": "msg",
+        "style": "",
+        "onvalue": "true",
+        "onvalueType": "bool",
+        "onicon": "",
+        "oncolor": "",
+        "offvalue": "false",
+        "offvalueType": "bool",
+        "officon": "",
+        "offcolor": "",
+        "animate": false,
+        "className": ".estop-switch .md-thumb {   background-color: #dc3545 !important; }",
+        "x": 470,
+        "y": 200,
+        "wires": [
+            [
+                "184464b87b09d7f5"
+            ]
+        ]
+    },
+    {
+        "id": "8937cf8c274b020a",
+        "type": "ui_switch",
+        "z": "f6dc036d698044b2",
+        "name": "",
+        "label": "Enable",
+        "tooltip": "",
+        "group": "e1f521c6cb33b4b3",
+        "order": 8,
+        "width": 0,
+        "height": 0,
+        "passthru": true,
+        "decouple": "false",
+        "topic": "topic",
+        "topicType": "msg",
+        "style": "",
+        "onvalue": "true",
+        "onvalueType": "bool",
+        "onicon": "",
+        "oncolor": "",
+        "offvalue": "false",
+        "offvalueType": "bool",
+        "officon": "",
+        "offcolor": "",
+        "animate": false,
+        "className": "motor-enable-switch",
+        "x": 2600,
+        "y": 200,
+        "wires": [
+            [
+                "80c35e25fcdafab1"
+            ]
+        ]
+    },
+    {
+        "id": "f784858ddd93e13e",
+        "type": "ui_switch",
+        "z": "f6dc036d698044b2",
+        "name": "",
+        "label": "Direction (Reverse)",
+        "tooltip": "",
+        "group": "c9abd556f5784a80",
+        "order": 3,
+        "width": 0,
+        "height": 0,
+        "passthru": true,
+        "decouple": "false",
+        "topic": "topic",
+        "topicType": "msg",
+        "style": "",
+        "onvalue": "true",
+        "onvalueType": "bool",
+        "onicon": "",
+        "oncolor": "",
+        "offvalue": "false",
+        "offvalueType": "bool",
+        "officon": "",
+        "offcolor": "",
+        "animate": false,
+        "className": "blue-switch",
+        "x": 1950,
+        "y": 260,
+        "wires": [
+            [
+                "286089539fafdeda"
+            ]
+        ]
+    },
+    {
+        "id": "a5e11a2f40a0c051",
+        "type": "ui_switch",
+        "z": "f6dc036d698044b2",
+        "name": "",
+        "label": "Direction (Reverse)",
+        "tooltip": "",
+        "group": "e1f521c6cb33b4b3",
+        "order": 9,
+        "width": 0,
+        "height": 0,
+        "passthru": true,
+        "decouple": "false",
+        "topic": "topic",
+        "topicType": "msg",
+        "style": "",
+        "onvalue": "true",
+        "onvalueType": "bool",
+        "onicon": "",
+        "oncolor": "",
+        "offvalue": "false",
+        "offvalueType": "bool",
+        "officon": "",
+        "offcolor": "",
+        "animate": false,
+        "className": "blue-switch",
+        "x": 2570,
+        "y": 260,
+        "wires": [
+            [
+                "6348c1f2fb24c6d9"
+            ]
+        ]
+    },
+    {
+        "id": "43efbaed178e1d7c",
+        "type": "ui_slider",
+        "z": "f6dc036d698044b2",
+        "name": "",
+        "label": "Speed Control ",
+        "tooltip": "",
+        "group": "c9abd556f5784a80",
+        "order": 4,
+        "width": 0,
+        "height": 0,
+        "passthru": true,
+        "outs": "all",
+        "topic": "topic",
+        "topicType": "msg",
+        "min": "0",
+        "max": "100",
+        "step": "1",
+        "className": "",
+        "x": 1960,
+        "y": 380,
+        "wires": [
+            [
+                "451054e4684efc9c"
+            ]
+        ]
+    },
+    {
+        "id": "5260099e08be5429",
+        "type": "ui_text",
+        "z": "f6dc036d698044b2",
+        "group": "c9abd556f5784a80",
+        "order": 5,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Speed",
+        "format": "<font color=\"{{color}}\"><b>{{msg.payload}}</b></font>",
+        "layout": "row-spread",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 2310,
+        "y": 440,
+        "wires": []
+    },
+    {
+        "id": "91ca372a0c140906",
+        "type": "ui_text",
+        "z": "f6dc036d698044b2",
+        "group": "e1f521c6cb33b4b3",
+        "order": 10,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Speed",
+        "format": "<font color=\"{{color}}\"><b>{{msg.payload}}</b></font>",
+        "layout": "row-spread",
+        "className": "",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#000000",
+        "x": 2930,
+        "y": 380,
+        "wires": []
+    },
+    {
+        "id": "af4ff79633889fef",
+        "type": "ui_gauge",
+        "z": "f6dc036d698044b2",
+        "name": "Temperature Gauge",
+        "group": "478a2351ed3434a5",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "gtype": "gage",
+        "title": "Gauge (°C)",
+        "label": "°C",
+        "format": "{{value}}",
+        "min": 0,
+        "max": "50",
+        "colors": [
+            "#2e8b57",
+            "#e0a72f",
+            "#dc3545"
+        ],
+        "seg1": "30",
+        "seg2": "40",
+        "diff": false,
+        "className": "",
+        "x": 4080,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "7d3be01c052669d4",
+        "type": "ui_chart",
+        "z": "f6dc036d698044b2",
+        "name": "Temperature Chart",
+        "group": "478a2351ed3434a5",
+        "order": 4,
+        "width": 0,
+        "height": 0,
+        "label": "Trend (°C)",
+        "chartType": "line",
+        "legend": "false",
+        "xformat": "HH:mm:ss",
+        "interpolate": "linear",
+        "nodata": "0",
+        "dot": false,
+        "ymin": "0",
+        "ymax": "50",
+        "removeOlder": "24",
+        "removeOlderPoints": "",
+        "removeOlderUnit": "3600",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#2a7e83",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 4070,
+        "y": 320,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "b0289559d9c3ec21",
+        "type": "ui_template",
+        "z": "f6dc036d698044b2",
+        "group": "47d3835a09c5db84",
+        "name": "Field Button Status",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "format": "<div style=\"\n    display: flex;\n    flex-direction: column;\n    justify-content: center;\n    align-items: center;\n    background-color: #262626;\n    border: 1px solid #333333;\n    border-bottom: 4px solid {{msg.color}};\n    border-radius: 6px;\n    padding: 10px 5px;\n    height: 100%;\n    box-sizing: border-box;\n    box-shadow: inset 0px 0px 10px rgba(0,0,0,0.5);\n\">\n    <span style=\"color: #999999; font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 4px;\">\n        Field Button\n    </span>\n\n    <span style=\"color: {{msg.color}}; font-weight: bold; font-size: 15px; letter-spacing: 0.5px; text-shadow: 0px 0px 10px {{msg.color}}60;\">\n        {{msg.text}}\n    </span>\n</div>",
+        "storeOutMessages": true,
+        "fwdInMessages": true,
+        "resendOnRefresh": true,
+        "templateScope": "local",
+        "className": "",
+        "x": 1570,
+        "y": 360,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "4d665bc807dd147d",
+        "type": "ui_template",
+        "z": "f6dc036d698044b2",
+        "group": "",
+        "name": "Global Template",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "format": "<link href=\"https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap\" rel=\"stylesheet\">\n<style>\n    body.nr-dashboard-theme {\n        font-family: 'Poppins', sans-serif !important;\n    }\n\n    /* E-Stop switch turns red when active (checked) */\n    md-switch[aria-label=\"E-Stop\"].md-checked .md-thumb,\n    .nr-dashboard-switch.md-checked .md-thumb {\n    background-color: #dc3545 !important;\n    }\n\n    /* Motor Enable switches turn green when ON */\n    .motor-enable-switch md-switch.md-checked .md-thumb,\n    .motor-enable-switch .md-checked .md-thumb {\n    background-color: #2E8B57 !important;\n    }\n    .motor-enable-switch md-switch.md-checked .md-bar,\n    .motor-enable-switch .md-checked .md-bar {\n    background-color: rgba(46, 139, 87, 0.5) !important;\n    }\n\n    /* Give all status LEDs a subtle glow so on/off states pop */\n    .nr-dashboard-led,\n    [class*=\"led\"] svg circle {\n    filter: drop-shadow(0 0 4px currentColor);\n    }\n\n    /* Group titles (Emergency Interlocks, Actuator Controls, etc.) */\n    .nr-dashboard-cardtitle {\n    font-weight: 600 !important;\n    letter-spacing: 0.3px;\n    }\n    \n    /* Sub-headers like \"Motor 1 Controls\" / \"Motor 2 Controls\" */\n    .nr-dashboard-widget div[ng-if] > div:first-child,\n    .motor-subheader {\n    font-weight: 500 !important;\n    font-size: 13px !important;\n    color: rgba(255,255,255,0.55) !important;\n    text-transform: uppercase;\n    letter-spacing: 0.5px;\n    }\n    \n    /* Regular field labels (Enable, Speed Control, Speed) */\n    .nr-dashboard-label {\n    font-weight: 400 !important;\n    color: rgba(255,255,255,0.85);\n    }\n\n    /* More vertical space between widgets inside a group */\n    .nr-dashboard-widget {\n    margin-bottom: 6px !important;\n    }\n    \n    /* More internal padding on cards */\n    md-card.nr-dashboard-groupbox {\n    padding: 16px !important;\n    }\n\n    md-card.nr-dashboard-groupbox {\n    box-shadow: 0 2px 8px rgba(0,0,0,0.4) !important;\n    border: 1px solid rgba(255,255,255,0.06) !important;\n    border-radius: 8px !important;\n    }\n\n    /* Custom Blue Switches turn blue when ON (checked) */\n    .blue-switch md-switch.md-checked .md-thumb,\n    .blue-switch .md-checked .md-thumb {\n    background-color: #00BCD4 !important;\n    }\n    \n    .blue-switch md-switch.md-checked .md-bar,\n    .blue-switch .md-checked .md-bar {\n    background-color: rgba(33, 150, 243, 0.5) !important;\n    }\n\n    /* Custom Chart Hover Tooltip Styling */\n    #chartjs-tooltip, .chartjs-tooltip {\n    background: rgba(0, 0, 0, 0.85) !important;\n    color: #ffffff !important;\n    border-radius: 4px !important;\n    padding: 6px 10px !important;\n    font-family: 'Poppins', sans-serif !important;\n    font-size: 12px !important;\n    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5) !important;\n    pointer-events: none !important;\n    }\n\n</style>",
+        "storeOutMessages": true,
+        "fwdInMessages": true,
+        "resendOnRefresh": true,
+        "templateScope": "global",
+        "className": "",
+        "x": 160,
+        "y": 200,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "97ed2bef1c3153e6",
+        "type": "ui_template",
+        "z": "f6dc036d698044b2",
+        "group": "cd834a7d98814dc9",
+        "name": "",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "format": "<div style=\"\n    display: flex; \n    justify-content: space-between; \n    align-items: center; \n    padding: 14px 16px; \n    background-color: #262626; \n    border-radius: 6px; \n    border: 1px solid #333333;\n    border-left: 5px solid {{msg.payload !== false ? '#2E8B57' : '#dc3545'}};\n    box-shadow: inset 0px 0px 10px rgba(0,0,0,0.4);\n\">\n    <!-- Router Info -->\n    <div>\n        <span style=\"color: #999999; font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 1px;\">\n            Wi-Fi Extender (192.168.2.240)\n        </span>\n        <div style=\"font-size: 16px; font-weight: 700; margin-top: 2px;\">\n            <span ng-if=\"msg.payload !== false\" style=\"color: #2E8B57;\">ONLINE</span>\n            <span ng-if=\"msg.payload === false\" style=\"color: #dc3545;\">OFFLINE</span>\n        </div>\n    </div>\n\n    <!-- Latency / Response Time -->\n    <div style=\"text-align: right;\">\n        <span style=\"color: #999999; font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 1px;\">\n            LATENCY\n        </span>\n        <div style=\"color: #00BCD4; font-size: 20px; font-weight: 700; margin-top: 2px;\">\n            {{msg.payload !== false ? msg.payload + ' ms' : 'N/A'}}\n        </div>\n    </div>\n</div>",
+        "storeOutMessages": true,
+        "fwdInMessages": true,
+        "resendOnRefresh": true,
+        "templateScope": "local",
+        "className": "",
+        "x": 4800,
+        "y": 200,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "87b3b3bcbcd668bd",
+        "type": "ui_template",
+        "z": "f6dc036d698044b2",
+        "group": "478a2351ed3434a5",
+        "name": "24h Stats KPI Card",
+        "order": 5,
+        "width": 0,
+        "height": 0,
+        "format": "<div style=\"\n    display: flex; \n    justify-content: space-between; \n    align-items: center; \n    background-color: #262626; \n    border: 1px solid #333333; \n    border-radius: 6px; \n    padding: 10px 14px; \n    margin-bottom: 8px;\n    box-shadow: inset 0px 0px 10px rgba(0,0,0,0.4);\n\">\n    <!-- Dynamic Average -->\n    <div style=\"text-align: center; flex: 1; border-right: 1px solid #333333;\">\n        <span style=\"color: #999999; font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 1px;\">\n            {{msg.payload.label || 'RANGE'}} AVG\n        </span>\n        <div style=\"color: #00BCD4; font-size: 18px; font-weight: 700; margin-top: 2px;\">\n            {{msg.payload.avg}} <span style=\"font-size: 12px; font-weight: 400;\">°C</span>\n        </div>\n    </div>\n\n    <!-- Dynamic Max -->\n    <div style=\"text-align: center; flex: 1; border-right: 1px solid #333333;\">\n        <span style=\"color: #999999; font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 1px;\">\n            {{msg.payload.label || 'RANGE'}} MAX\n        </span>\n        <div style=\"color: #dc3545; font-size: 18px; font-weight: 700; margin-top: 2px;\">\n            {{msg.payload.max}} <span style=\"font-size: 12px; font-weight: 400;\">°C</span>\n        </div>\n    </div>\n\n    <!-- Dynamic Min -->\n    <div style=\"text-align: center; flex: 1;\">\n        <span style=\"color: #999999; font-size: 10px; font-weight: 500; text-transform: uppercase; letter-spacing: 1px;\">\n            {{msg.payload.label || 'RANGE'}} MIN\n        </span>\n        <div style=\"color: #2E8B57; font-size: 18px; font-weight: 700; margin-top: 2px;\">\n            {{msg.payload.min}} <span style=\"font-size: 12px; font-weight: 400;\">°C</span>\n        </div>\n    </div>\n</div>",
+        "storeOutMessages": true,
+        "fwdInMessages": true,
+        "resendOnRefresh": true,
+        "templateScope": "local",
+        "className": "",
+        "x": 3990,
+        "y": 420,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "81902e7efc19e43a",
+        "type": "ui_template",
+        "z": "f6dc036d698044b2",
+        "group": "478a2351ed3434a5",
+        "name": "Temperature Alarm Banner",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "format": "<div style=\"\n    display: flex;\n    flex-direction: column;\n    justify-content: center;\n    align-items: center;\n    background-color: {{msg.payload.bgColor}};\n    border-radius: 6px;\n    padding: 6px 10px;\n    margin: 0 !important;\n    height: 100%;\n    box-sizing: border-box;\n    box-shadow: inset 0px 0px 8px rgba(0,0,0,0.3);\n    overflow: hidden !important;\n    transition: background-color 0.4s ease;\n\" ng-class=\"{'alarm-flash': msg.payload.flash}\">\n\n    <!-- State Header -->\n    <div style=\"\n        font-size: 11px;\n        font-weight: 700;\n        letter-spacing: 1.5px;\n        text-transform: uppercase;\n        color: {{msg.payload.textColor}};\n        opacity: 0.9;\n        line-height: 1.2;\n    \">\n        {{msg.payload.state}}\n    </div>\n\n    <!-- Alarm / Message Text -->\n    <div style=\"\n        font-size: 12px;\n        font-weight: 600;\n        color: {{msg.payload.textColor}};\n        text-align: center;\n        letter-spacing: 0.2px;\n        line-height: 1.2;\n        margin-top: 2px;\n    \">\n        {{msg.payload.text}}\n    </div>\n</div>\n\n<style>\n    /* Suppress Angular Dashboard card scrollbars specifically for this widget */\n    md-card[widget-id=\"{{$id}}\"] md-card-content,\n    md-card[widget-id=\"{{$id}}\"] {\n        overflow: hidden !important;\n        padding: 0 !important;\n    }\n\n    @keyframes alarmPulsing {\n        0% {\n            opacity: 1.0;\n            transform: scale(1);\n        }\n\n        50% {\n            opacity: 0.4;\n            transform: scale(0.98);\n        }\n\n        100% {\n            opacity: 1.0;\n            transform: scale(1);\n        }\n    }\n\n    .alarm-flash {\n        animation: alarmPulsing 1s infinite ease-in-out;\n    }\n</style>",
+        "storeOutMessages": true,
+        "fwdInMessages": true,
+        "resendOnRefresh": true,
+        "templateScope": "local",
+        "className": "",
+        "x": 4320,
+        "y": 200,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "c79bd64f55663cb2",
+        "type": "ui_led",
+        "z": "f6dc036d698044b2",
+        "order": 3,
+        "group": "47d3835a09c5db84",
+        "width": 0,
+        "height": 0,
+        "label": "Motor 1 Status",
+        "labelPlacement": "left",
+        "labelAlignment": "left",
+        "colorForValue": [
+            {
+                "color": "#808080",
+                "value": "false",
+                "valueType": "bool"
+            },
+            {
+                "color": "#2e8b57",
+                "value": "true",
+                "valueType": "bool"
+            }
+        ],
+        "allowColorForValueInMessage": false,
+        "shape": "circle",
+        "showGlow": true,
+        "name": "Motor 1 Status",
+        "x": 1520,
+        "y": 260,
+        "wires": []
+    },
+    {
+        "id": "3ff88544c2f9dfd1",
+        "type": "ui_led",
+        "z": "f6dc036d698044b2",
+        "order": 4,
+        "group": "47d3835a09c5db84",
+        "width": 0,
+        "height": 0,
+        "label": "Motor 2 Status",
+        "labelPlacement": "left",
+        "labelAlignment": "left",
+        "colorForValue": [
+            {
+                "color": "#808080",
+                "value": "false",
+                "valueType": "bool"
+            },
+            {
+                "color": "#2e8b57",
+                "value": "true",
+                "valueType": "bool"
+            }
+        ],
+        "allowColorForValueInMessage": false,
+        "shape": "circle",
+        "showGlow": true,
+        "name": "Motor 2 Status",
+        "x": 1520,
+        "y": 300,
+        "wires": []
+    },
+    {
+        "id": "7372f061967da169",
+        "type": "ui_led",
+        "z": "f6dc036d698044b2",
+        "order": 1,
+        "group": "47d3835a09c5db84",
+        "width": 0,
+        "height": 0,
+        "label": "System Status",
+        "labelPlacement": "left",
+        "labelAlignment": "left",
+        "colorForValue": [
+            {
+                "color": "#ff0000",
+                "value": "false",
+                "valueType": "bool"
+            },
+            {
+                "color": "#2e8b57",
+                "value": "true",
+                "valueType": "bool"
+            }
+        ],
+        "allowColorForValueInMessage": false,
+        "shape": "circle",
+        "showGlow": true,
+        "name": "System Status",
+        "x": 1520,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "ce50de5a18c56972",
+        "type": "ui_led",
+        "z": "f6dc036d698044b2",
+        "order": 1,
+        "group": "cd834a7d98814dc9",
+        "width": 0,
+        "height": 0,
+        "label": "Database Status",
+        "labelPlacement": "left",
+        "labelAlignment": "left",
+        "colorForValue": [
+            {
+                "color": "#dc3545",
+                "value": "false",
+                "valueType": "bool"
+            },
+            {
+                "color": "#2e8b57",
+                "value": "true",
+                "valueType": "bool"
+            }
+        ],
+        "allowColorForValueInMessage": false,
+        "shape": "circle",
+        "showGlow": true,
+        "name": "Historian Logging Status",
+        "x": 4850,
+        "y": 260,
+        "wires": []
+    },
+    {
+        "id": "6e18aad42a4023f2",
+        "type": "ping",
+        "z": "f6dc036d698044b2",
+        "protocol": "Automatic",
+        "mode": "timed",
+        "name": "Ping Network",
+        "host": "192.168.2.240",
+        "timer": "1",
+        "inputs": 0,
+        "x": 4610,
+        "y": 200,
+        "wires": [
+            [
+                "97ed2bef1c3153e6"
+            ]
+        ]
+    },
+    {
+        "id": "e58cbab20f12d36f",
+        "type": "modbus-client",
+        "name": "OpenPLC Runtime",
+        "clienttype": "tcp",
+        "bufferCommands": true,
+        "stateLogEnabled": false,
+        "queueLogEnabled": false,
+        "failureLogEnabled": true,
+        "tcpHost": "127.0.0.1",
+        "tcpPort": 502,
+        "tcpType": "DEFAULT",
+        "serialPort": "/dev/ttyUSB",
+        "serialType": "RTU-BUFFERD",
+        "serialBaudrate": 9600,
+        "serialDatabits": 8,
+        "serialStopbits": 1,
+        "serialParity": "none",
+        "serialConnectionDelay": 100,
+        "serialAsciiResponseStartDelimiter": "0x3A",
+        "unit_id": 1,
+        "commandDelay": 1,
+        "clientTimeout": 1000,
+        "reconnectOnTimeout": true,
+        "reconnectTimeout": 2000,
+        "parallelUnitIdsAllowed": true,
+        "showErrors": false,
+        "showWarnings": true,
+        "showLogs": true
+    },
+    {
+        "id": "8ea868a8dba72bdb",
+        "type": "ui_group",
+        "name": "EMERGENCY INTERLOCKS",
+        "tab": "b5e91092fa40ef56",
+        "order": 1,
+        "disp": true,
+        "width": "6",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "478a2351ed3434a5",
+        "type": "ui_group",
+        "name": "TEMPERATURE DATA",
+        "tab": "b5e91092fa40ef56",
+        "order": 4,
+        "disp": true,
+        "width": "8",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "c9abd556f5784a80",
+        "type": "ui_group",
+        "name": "MOTOR 1 CONTROLS",
+        "tab": "b5e91092fa40ef56",
+        "order": 2,
+        "disp": true,
+        "width": "6",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "e1f521c6cb33b4b3",
+        "type": "ui_group",
+        "name": "MOTOR 2 CONTROLS",
+        "tab": "b5e91092fa40ef56",
+        "order": 3,
+        "disp": true,
+        "width": "6",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "47d3835a09c5db84",
+        "type": "ui_group",
+        "name": "FIELD STATUS",
+        "tab": "b5e91092fa40ef56",
+        "order": 6,
+        "disp": true,
+        "width": "6",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "cd834a7d98814dc9",
+        "type": "ui_group",
+        "name": "NETWORK DIAGNOSTICS",
+        "tab": "b5e91092fa40ef56",
+        "order": 5,
+        "disp": true,
+        "width": 6,
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "b5e91092fa40ef56",
+        "type": "ui_tab",
+        "name": "SCADA MINI-LAB",
+        "icon": "dashboard",
+        "disabled": false,
+        "hidden": false
+    },
+    {
+        "id": "580472217651d3d9",
+        "type": "global-config",
+        "env": [],
+        "modules": {
+            "node-red-contrib-modbus": "5.60.1",
+            "node-red-dashboard": "3.6.6",
+            "node-red-contrib-ui-led": "0.4.11",
+            "node-red-node-ping": "0.3.3"
+        }
+    }
+]
