@@ -64,3 +64,25 @@ Node-RED SCADA Server -> Omron PLC -> (Transmitter, E-Stop Button, Safety Reset 
 | TB6600 Driver 2 | A+ / A- / B+ / B- | NEMA 17 Motor 2 | 4-Wire Leads |
 | Omron CP2E PLC | COM (Output) | Omron CP2E PLC | 2x COM (Output) |
 | SCADA Server (PC) | Ethernet Port (RJ45) | Omron CP2E PLC | Ethernet Port (RJ45) |
+
+## Software Setup & Execution Walkthrough
+
+### 1. Omron CP2E PLC Programming
+1. **Install CX-Programmer**: Download and install OMRON CX-One, which includes CX-Programmer.
+2. **Open the Project**: Launch CX-Programmer and open `OmronSCADAPTG_CXProgrammer.cxp`.
+3. **Configure Network**: Go to PLC settings and configure the PLC's IP address to match your network (e.g., `192.168.2.xxx`).
+4. **Compile and Download**: 
+   - Compile the program (Ctrl+F7).
+   - Go online with the PLC (Ctrl+W).
+   - Download the program to the PLC (Program > Transfer > To PLC).
+5. **Run Mode**: Switch the PLC into Run/Monitor mode to start execution.
+
+### 2. SCADA Server (Node-RED)
+1. **Start Node-RED**: Open command prompt on your SCADA laptop and type `node-red`.
+2. **Import Flow**: 
+   - Open browser and go to `http://localhost:1880`.
+   - Click the menu (hamburger icon) > Import.
+   - Select `node-REDFlow.json` from the `PLC System` directory.
+   - Click Import.
+3. **Configure Nodes**: Update the Modbus nodes within the flow to point to the Omron PLC's IP address.
+4. **Deploy**: Click the Deploy button to apply the changes and start the SCADA interface.
