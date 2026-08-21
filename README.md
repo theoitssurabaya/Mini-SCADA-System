@@ -1,6 +1,6 @@
-# Protergo-SCADA-System
+# Mini-SCADA-System
 
-Welcome to the Protergo SCADA System repository. This project is divided into two main components:
+Welcome to the Mini SCADA System repository. This project is divided into two main components:
 - [PLC System](./PLC%20System/README.md)
 - [Raspberry System](./Raspberry%20System/README.md)
 
