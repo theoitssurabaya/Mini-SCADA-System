@@ -69,7 +69,7 @@ Node-RED SCADA Server -> Omron PLC -> (Transmitter, E-Stop Button, Safety Reset 
 
 ### 1. Omron CP2E PLC Programming
 1. **Install CX-Programmer**: Download and install OMRON CX-One, which includes CX-Programmer.
-2. **Open the Project**: Launch CX-Programmer and open `OmronSCADAPTG_CXProgrammer.cxp`.
+2. **Open the Project**: Launch CX-Programmer and open `OmronSCADA_CXProgrammer.cxp`.
 3. **Configure Network**: Go to PLC settings and configure the PLC's IP address to match your network (e.g., `192.168.2.xxx`).
 4. **Compile and Download**: 
    - Compile the program (Ctrl+F7).
