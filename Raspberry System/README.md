@@ -72,11 +72,46 @@ Laptop SCADA Server (Node-RED) -> Ethernet Hub & Wi-Fi Extender -> RTU 1 (Raspbe
 | GND | DS18B20 Temp Sensor | Black Wire (GND) |
 | GPIO 4 | DS18B20 Temp Sensor | Yellow Wire (DATA) |
 
+## Protocols & Data Mapping
+
+### 1. Protocols & Ports
+* **RTU 1 (Raspberry Pi)**: Modbus TCP Server (Port 502)
+* **RTU 2 (ESP8266)**: Modbus TCP Server (Port 502)
+* **Virtual PLC (OpenPLC)**: Modbus TCP Server (Port 502)
+* **SCADA Server (Node-RED)**: HTTP Web Server (Port 1880)
+
+### 2. Modbus Register Mapping
+
+#### Field Devices (RTUs)
+| RTU Node | Register Type | Address | Data Description | Data Range / Values |
+| :--- | :--- | :--- | :--- | :--- |
+| **Raspberry Pi (RTU 1)** | Holding Register (4x) | 200 | Motor 1 Speed (RPM) | -100 to 100 (Negative = Reverse) |
+| **Raspberry Pi (RTU 1)** | Holding Register (4x) | 201 | Motor 2 Speed (RPM) | -100 to 100 (Negative = Reverse) |
+| **ESP8266 (RTU 2)** | Holding Register (4x) | 100 | DS18B20 Temperature | °C Scaled by x100 |
+| **ESP8266 (RTU 2)** | Discrete Input (1x) | 0 | XB7 Push Button State | 0 (Released), 1 (Pressed) |
+
+#### Virtual PLC (OpenPLC) Central Logic
+| Register Type | Address | Data Description |
+| :--- | :--- | :--- |
+| Coil (0x) | 1 | Node-RED Emergency Stop |
+| Coil (0x) | 2 | Node-RED Safety Reset |
+| Coil (0x) | 4 | Master Safety Lockout Latch Bit |
+| Coil (0x) | 5 | Motor 1 LED Status |
+| Coil (0x) | 6 | Motor 2 LED Status |
+| Coil (0x) | 7 | Field Override Badge Status |
+| Coil (0x) | 8 | Motor 1 Switch Enable |
+| Coil (0x) | 9 | Motor 2 Switch Enable |
+| Coil (0x) | 10 | Motor 1 Direction |
+| Coil (0x) | 11 | Motor 2 Direction |
+| Holding Register (4x) | 0 | HMI Temp |
+| Holding Register (4x) | 1 | Node-RED Motor 1 Cmd |
+| Holding Register (4x) | 2 | Node-RED Motor 2 Cmd |
+
 ## Software Setup & Execution Walkthrough
 
 ### 1. RTU 1: Raspberry Pi 3
-1. **OS Setup**: Flash Raspberry Pi OS onto a microSD card and boot up the Pi. Connect it to the network.
-2. **Install Dependencies**: Open the Pi's terminal and run:
+1. **OS Setup**: Flash Raspberry Pi OS onto a microSD card and boot up the Pi. Connect it to the network. *(Note: You can access the Pi remotely via SSH using `ssh pi@192.168.2.220`)*.
+2. **Install Dependencies**: Open the Pi's terminal (or your SSH session) and run:
    ```bash
    sudo apt update
    sudo apt install python3 python3-pip
@@ -151,3 +186,28 @@ Laptop SCADA Server (Node-RED) -> Ethernet Hub & Wi-Fi Extender -> RTU 1 (Raspbe
    - Ensure OpenPLC runtime matches the static IPs of the Raspberry Pi (`192.168.2.220`) and ESP8266 (`192.168.2.230`).
    - The Node-RED setup needs to follow the OpenPLC IP, which in this case is the local computer (`127.0.0.1`).
 4. **Deploy**: Click the Deploy button.
+
+## System Operation Walkthrough
+
+1. **Access Dashboard**: Open a web browser on the SCADA Server and navigate to `http://localhost:1880/ui` to access the Node-RED HMI.
+2. **Safety Reset**: The system features a Safety Lockout mechanism. Before motors can run, ensure the Emergency Stop is disengaged, then click the **Safety Reset** button on the Node-RED dashboard to clear the safety lock latch in the Virtual PLC.
+3. **Motor Control**: Use the HMI switches to enable Motor 1 and Motor 2. You can set their rotational direction (FWD/REV) and adjust their speed via the slider.
+4. **Thermal Monitoring**: The DS18B20 Temp sensor feeds live data to the dashboard. If the temperature exceeds safe thresholds, the system's thermal logic will trigger warnings or automatically ramp up Motor 2's speed for cooling.
+5. **Field Override**: Pressing the physical XB7 Push Button in the field will trigger a physical override status visible on the SCADA dashboard.
+6. **Emergency Stop**: Click the Emergency Stop button on the HMI dashboard to immediately halt all operations and engage the Safety Lockout.
+
+## System Power Up & Shutdown Procedures
+
+### Power On Procedure
+1. Power up the Network Infrastructure (Wi-Fi Extender & Ethernet Hub).
+2. Boot the SCADA Server Laptop and start the OpenPLC Runtime and Node-RED.
+3. Plug in the 5V DC Adapter to power on RTU 2 (ESP8266).
+4. Plug in the 12V DC Adapter to power on RTU 1 (Raspberry Pi 3) via the LM2596 Buck Converter and TB6612FNG Motor Driver.
+5. Wait for the RTUs to connect to the network. The Node-RED dashboard will display live telemetry.
+
+### Power Off Procedure
+1. Stop all active motor commands from the Node-RED dashboard to ensure safe states.
+2. Shutdown the Raspberry Pi gracefully via SSH (`sudo shutdown -h now`) or Node-RED command if available. Wait for the green ACT LED to stop blinking.
+3. Unplug the 12V DC Adapter (Raspberry Pi & Motor Driver power).
+4. Unplug the 5V DC Adapter (ESP8266 power).
+5. Stop Node-RED and OpenPLC Runtime on the SCADA Server.

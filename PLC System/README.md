@@ -65,6 +65,32 @@ Node-RED SCADA Server -> Omron PLC -> (Transmitter, E-Stop Button, Safety Reset 
 | Omron CP2E PLC | COM (Output) | Omron CP2E PLC | 2x COM (Output) |
 | SCADA Server (PC) | Ethernet Port (RJ45) | Omron CP2E PLC | Ethernet Port (RJ45) |
 
+## Protocols & Data Mapping
+
+### 1. Protocols & Ports
+* **Omron CP2E PLC**: Modbus TCP Server (Port 502)
+* **SCADA Server (Node-RED)**: HTTP Web Server (Port 1880)
+
+### 2. Modbus Register Mapping
+| Register Type | Address | Data Description |
+| :--- | :--- | :--- |
+| Coil (0x) | 1 | E-Stop Command |
+| Coil (0x) | 2 | Safety Reset Command |
+| Coil (0x) | 3 | Physical Field E-Stop Status |
+| Coil (0x) | 4 | Master Safety Latch Bit |
+| Coil (0x) | 5 | Motor 1 Running Status |
+| Coil (0x) | 6 | Motor 2 Running Status |
+| Coil (0x) | 7 | Field Button Status |
+| Coil (0x) | 16 | Motor 1 Enable Command |
+| Coil (0x) | 17 | Motor 2 Enable Command |
+| Coil (0x) | 18 | Motor 1 Direction Command |
+| Coil (0x) | 19 | Motor 2 Direction Command |
+| Holding Register (4x) | 100 | Motor 1 Speed Feedback (RPM) |
+| Holding Register (4x) | 101 | Motor 2 Speed Feedback (RPM) |
+| Holding Register (4x) | 1024 | Temperature Raw (x100 °C) |
+| Holding Register (4x) | 1025 | Speed Control Setpoint |
+| Holding Register (4x) | 1026 | Calculated Thermal Auto-Speed |
+
 ## Software Setup & Execution Walkthrough
 
 ### 1. Omron CP2E PLC Programming
@@ -86,3 +112,24 @@ Node-RED SCADA Server -> Omron PLC -> (Transmitter, E-Stop Button, Safety Reset 
    - Click Import.
 3. **Configure Nodes**: Update the Modbus nodes within the flow to point to the Omron PLC's IP address.
 4. **Deploy**: Click the Deploy button to apply the changes and start the SCADA interface.
+
+## System Operation Walkthrough
+
+1. **Safety Lockout System (Reset)**: The PLC features a hardcoded Safety Lockout mechanism. Before any operation can begin, ensure the physical red XB2 E-Stop button is released (pulled out). You MUST press the physical Red Safety Reset XB7 button to clear the Master Safety Lockout Latch in the PLC. Motors will not spin while this latch is engaged.
+2. **Access Dashboard**: Open a web browser on the SCADA Server and navigate to `http://localhost:1880/ui` to access the Node-RED HMI.
+3. **Motor Control**: You can control the motors (Enable, Direction, Speed) directly from the HMI, or use the physical Green XB7 buttons in the field to toggle the motors on/off.
+4. **Thermal Monitoring**: The PT100 sensor provides real-time temperature feedback. The SCADA system will log this data to IoTDB and can adjust Motor 2's speed if the thermal ramp triggers.
+5. **Emergency Stop**: In case of an emergency, press the physical field E-Stop button or click the Emergency Stop button on the HMI dashboard to immediately halt all operations.
+
+## System Power Up & Shutdown Procedures
+
+### Power On Procedure
+1. Boot the SCADA Server Laptop and start Node-RED.
+2. Plug in the AC Power Cable to energize the Mean Well PSU. This will supply 24V DC to the VCC Bus Bar, powering the Omron CP2E PLC, PT100 Transmitter, TB6600 Drivers, and all Field Buttons.
+3. Wait for the Omron PLC to finish booting and enter RUN/MONITOR mode.
+4. Verify the Node-RED dashboard indicates active connection and telemetry.
+
+### Power Off Procedure
+1. Ensure the E-Stop is pressed or all motors are commanded to a full stop via the Node-RED dashboard.
+2. Unplug the AC Power Cable to de-energize the Mean Well PSU, safely cutting power to the PLC, drivers, and sensors simultaneously.
+3. Stop Node-RED on the SCADA Server.
