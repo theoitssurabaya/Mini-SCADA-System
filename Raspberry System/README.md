@@ -129,7 +129,7 @@ Laptop SCADA Server (Node-RED) -> Ethernet Hub & Wi-Fi Extender -> RTU 1 (Raspbe
    - `ModbusIP_ESP8266`
 4. **Flash Firmware**: Open `esp8266Program.cpp`, adjust the WiFi credentials (`YOUR_WIFI_SSID` / `YOUR_WIFI_PASSWORD`), select your ESP8266 board under Tools, and click Upload.
 
-### 3. RTU 3: OpenPLC
+### 3. Virtual PLC: OpenPLC
 1. **Install OpenPLC Editor**: Download and install OpenPLC Editor on your laptop.
 2. **Upload Code**: Open `OpenPLCProgram.st` in the editor, compile it, and transfer it to your OpenPLC runtime device.
 
