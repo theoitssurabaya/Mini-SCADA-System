@@ -119,15 +119,16 @@ Laptop SCADA Server (Node-RED) -> Ethernet Hub & Wi-Fi Extender -> RTU 1 (Raspbe
    ```
 
 ### 2. RTU 2: ESP8266
-1. **Install Arduino IDE**: Download and install the Arduino IDE on your development laptop.
-2. **Install ESP8266 Board**: 
-   - Go to File > Preferences and add `http://arduino.esp8266.com/stable/package_esp8266com_index.json` to Additional Boards Manager URLs.
-   - Go to Tools > Board > Boards Manager, search for `esp8266`, and install it.
-3. **Install Libraries**: In Library Manager (Tools > Manage Libraries), install:
-   - `OneWire`
-   - `DallasTemperature`
-   - `ModbusIP_ESP8266`
-4. **Flash Firmware**: Open `esp8266Program.cpp`, adjust the WiFi credentials (`YOUR_WIFI_SSID` / `YOUR_WIFI_PASSWORD`), select your ESP8266 board under Tools, and click Upload.
+1. **Install VSCode & PlatformIO**: Download and install Visual Studio Code, then install the PlatformIO IDE extension.
+2. **Create Project**: Open PlatformIO, create a new project, and select your ESP8266 board (e.g., NodeMCU 1.0 or D1 Mini) with the Arduino framework.
+3. **Install Libraries**: Open `platformio.ini` and add the following dependencies under `lib_deps`:
+   ```ini
+   lib_deps =
+     paulstoffregen/OneWire
+     milesburton/DallasTemperature
+     emelianov/modbus-esp8266
+   ```
+4. **Flash Firmware**: Copy `esp8266Program.cpp` into the `src/` folder (rename to `main.cpp`), adjust the WiFi credentials, and click the PlatformIO **Upload** button to build and flash the board.
 
 ### 3. Virtual PLC: OpenPLC
 1. **Install Software**: Download and install both OpenPLC Editor and OpenPLC Runtime on your laptop.
