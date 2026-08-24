@@ -117,6 +117,10 @@ Laptop SCADA Server (Node-RED) -> Ethernet Hub & Wi-Fi Extender -> RTU 1 (Raspbe
    sudo systemctl enable scada_rtu.service
    sudo systemctl start scada_rtu.service
    ```
+4. **Check Service Status**: To verify the service is running, use:
+   ```bash
+   sudo systemctl status scada_rtu.service
+   ```
 
 ### 2. RTU 2: ESP8266
 1. **Install VSCode & PlatformIO**: Download and install Visual Studio Code, then install the PlatformIO IDE extension.
