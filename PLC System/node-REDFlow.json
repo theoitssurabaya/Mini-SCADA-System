@@ -102,7 +102,7 @@
         "id": "3bed26f2f622326a",
         "type": "ui_led",
         "z": "2e708e7fa2ac0001",
-        "order": 3,
+        "order": 7,
         "group": "47d3835a09c5db84",
         "width": 0,
         "height": 0,
@@ -312,80 +312,6 @@
         ]
     },
     {
-        "id": "6b195e9f25c5d11a",
-        "type": "modbus-read",
-        "z": "2e708e7fa2ac0001",
-        "name": "",
-        "topic": "",
-        "showStatusActivities": false,
-        "logIOActivities": false,
-        "showErrors": false,
-        "showWarnings": true,
-        "unitid": "1",
-        "dataType": "Coil",
-        "adr": "7",
-        "quantity": "1",
-        "rate": "500",
-        "rateUnit": "ms",
-        "delayOnStart": false,
-        "enableDeformedMessages": false,
-        "startDelayTime": "",
-        "server": "defc33b0afdb4951",
-        "useIOFile": false,
-        "ioFile": "",
-        "useIOForPayload": false,
-        "emptyMsgOnFail": false,
-        "x": 1130,
-        "y": 500,
-        "wires": [
-            [
-                "cd64548bb2a6634c"
-            ],
-            []
-        ]
-    },
-    {
-        "id": "cd64548bb2a6634c",
-        "type": "function",
-        "z": "2e708e7fa2ac0001",
-        "name": "Extract Field Button Status",
-        "func": "// Extract the value from the Modbus array\nlet state = msg.payload;\nif (Array.isArray(state)) {\n    state = state[0];\n}\n\n// Translate to text and HP-HMI colors\nif (state === true || state === \"true\" || state === 1) {\n    msg.text = \"Field Override Active\";\n    msg.color = \"#3399ff\"; // Industrial Blue\n} else {\n    msg.text = \"Field Standby\";\n    msg.color = \"#555555\"; // Muted Grey\n}\n\nreturn msg;",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 1360,
-        "y": 500,
-        "wires": [
-            [
-                "bb46a12086be7499"
-            ]
-        ]
-    },
-    {
-        "id": "bb46a12086be7499",
-        "type": "ui_template",
-        "z": "2e708e7fa2ac0001",
-        "group": "47d3835a09c5db84",
-        "name": "Field Button Status",
-        "order": 2,
-        "width": 0,
-        "height": 0,
-        "format": "<div style=\"\n    display: flex;\n    flex-direction: column;\n    justify-content: center;\n    align-items: center;\n    background-color: #262626;\n    border: 1px solid #333333;\n    border-bottom: 4px solid {{msg.color}};\n    border-radius: 6px;\n    padding: 10px 5px;\n    height: 100%;\n    box-sizing: border-box;\n    box-shadow: inset 0px 0px 10px rgba(0,0,0,0.5);\n\">\n    <span style=\"color: #999999; font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 4px;\">\n        Field Button\n    </span>\n\n    <span style=\"color: {{msg.color}}; font-weight: bold; font-size: 15px; letter-spacing: 0.5px; text-shadow: 0px 0px 10px {{msg.color}}60;\">\n        {{msg.text}}\n    </span>\n</div>",
-        "storeOutMessages": true,
-        "fwdInMessages": true,
-        "resendOnRefresh": true,
-        "templateScope": "local",
-        "className": "",
-        "x": 1610,
-        "y": 500,
-        "wires": [
-            []
-        ]
-    },
-    {
         "id": "7b43af7113e2e278",
         "type": "modbus-write",
         "z": "2e708e7fa2ac0001",
@@ -471,7 +397,7 @@
         "id": "840516751c5c295a",
         "type": "ui_led",
         "z": "2e708e7fa2ac0001",
-        "order": 4,
+        "order": 10,
         "group": "47d3835a09c5db84",
         "width": 0,
         "height": 0,
@@ -502,7 +428,7 @@
         "id": "e35a62f34dd18830",
         "type": "ui_led",
         "z": "2e708e7fa2ac0001",
-        "order": 1,
+        "order": 2,
         "group": "47d3835a09c5db84",
         "width": 0,
         "height": 0,
@@ -1601,7 +1527,7 @@
         "id": "700f954efdd77332",
         "type": "ui_led",
         "z": "2e708e7fa2ac0001",
-        "order": 8,
+        "order": 3,
         "group": "47d3835a09c5db84",
         "width": 0,
         "height": 0,
@@ -1629,6 +1555,154 @@
         "wires": []
     },
     {
+        "id": "05b17bc8f3d98f81",
+        "type": "modbus-read",
+        "z": "2e708e7fa2ac0001",
+        "name": "",
+        "topic": "",
+        "showStatusActivities": false,
+        "logIOActivities": false,
+        "showErrors": false,
+        "showWarnings": true,
+        "unitid": "1",
+        "dataType": "Coil",
+        "adr": "7",
+        "quantity": "1",
+        "rate": "500",
+        "rateUnit": "ms",
+        "delayOnStart": false,
+        "enableDeformedMessages": false,
+        "startDelayTime": "",
+        "server": "defc33b0afdb4951",
+        "useIOFile": false,
+        "ioFile": "",
+        "useIOForPayload": false,
+        "emptyMsgOnFail": false,
+        "x": 1130,
+        "y": 480,
+        "wires": [
+            [
+                "54ca1f407eceee49"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "cd89816163f126c0",
+        "type": "modbus-read",
+        "z": "2e708e7fa2ac0001",
+        "name": "",
+        "topic": "",
+        "showStatusActivities": false,
+        "logIOActivities": false,
+        "showErrors": false,
+        "showWarnings": true,
+        "unitid": "1",
+        "dataType": "Coil",
+        "adr": "20",
+        "quantity": "1",
+        "rate": "500",
+        "rateUnit": "ms",
+        "delayOnStart": false,
+        "enableDeformedMessages": false,
+        "startDelayTime": "",
+        "server": "defc33b0afdb4951",
+        "useIOFile": false,
+        "ioFile": "",
+        "useIOForPayload": false,
+        "emptyMsgOnFail": false,
+        "x": 1130,
+        "y": 560,
+        "wires": [
+            [
+                "3aa2da74837a8fad"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "54ca1f407eceee49",
+        "type": "function",
+        "z": "2e708e7fa2ac0001",
+        "name": "Get Motor 1 Button Status",
+        "func": "let state = msg.payload[0];\n\nif (state === true) {\n    msg.text = \"Field Override Active\";\n    msg.color = \"#3399ff\"; // Industrial Blue\n} else {\n    msg.text = \"Field Standby\";\n    msg.color = \"#555555\"; // Muted Grey\n}\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1350,
+        "y": 480,
+        "wires": [
+            [
+                "617209eed211ab21"
+            ]
+        ]
+    },
+    {
+        "id": "3aa2da74837a8fad",
+        "type": "function",
+        "z": "2e708e7fa2ac0001",
+        "name": "Get Motor 2 Button Status",
+        "func": "let state = msg.payload[0];\n\nif (state === true) {\n    msg.text = \"Field Override Active\";\n    msg.color = \"#3399ff\"; // Industrial Blue\n} else {\n    msg.text = \"Field Standby\";\n    msg.color = \"#555555\"; // Muted Grey\n}\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1350,
+        "y": 560,
+        "wires": [
+            [
+                "f6a61e72b9505b32"
+            ]
+        ]
+    },
+    {
+        "id": "617209eed211ab21",
+        "type": "ui_template",
+        "z": "2e708e7fa2ac0001",
+        "group": "47d3835a09c5db84",
+        "name": "",
+        "order": 5,
+        "width": 0,
+        "height": 0,
+        "format": "<div style=\"\n    display: flex;\n    flex-direction: column;\n    justify-content: center;\n    align-items: center;\n    background-color: #262626;\n    border: 1px solid #333333;\n    border-bottom: 4px solid {{msg.color}};\n    border-radius: 6px;\n    padding: 10px 5px;\n    height: 100%;\n    box-sizing: border-box;\n    box-shadow: inset 0px 0px 10px rgba(0,0,0,0.5);\n\">\n    <span style=\"color: #999999; font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 4px;\">\n        Motor 1 Field Button\n    </span>\n\n    <span style=\"color: {{msg.color}}; font-weight: bold; font-size: 15px; letter-spacing: 0.5px; text-shadow: 0px 0px 10px {{msg.color}}60;\">\n        {{msg.text}}\n    </span>\n</div>",
+        "storeOutMessages": true,
+        "fwdInMessages": true,
+        "resendOnRefresh": true,
+        "templateScope": "local",
+        "className": "",
+        "x": 1580,
+        "y": 480,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "f6a61e72b9505b32",
+        "type": "ui_template",
+        "z": "2e708e7fa2ac0001",
+        "group": "47d3835a09c5db84",
+        "name": "",
+        "order": 8,
+        "width": 0,
+        "height": 0,
+        "format": "<div style=\"\n    display: flex;\n    flex-direction: column;\n    justify-content: center;\n    align-items: center;\n    background-color: #262626;\n    border: 1px solid #333333;\n    border-bottom: 4px solid {{msg.color}};\n    border-radius: 6px;\n    padding: 10px 5px;\n    height: 100%;\n    box-sizing: border-box;\n    box-shadow: inset 0px 0px 10px rgba(0,0,0,0.5);\n\">\n    <span style=\"color: #999999; font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 4px;\">\n        Motor 2 Field Button\n    </span>\n\n    <span style=\"color: {{msg.color}}; font-weight: bold; font-size: 15px; letter-spacing: 0.5px; text-shadow: 0px 0px 10px {{msg.color}}60;\">\n        {{msg.text}}\n    </span>\n</div>",
+        "storeOutMessages": true,
+        "fwdInMessages": true,
+        "resendOnRefresh": true,
+        "templateScope": "local",
+        "className": "",
+        "x": 1580,
+        "y": 560,
+        "wires": [
+            []
+        ]
+    },
+    {
         "id": "defc33b0afdb4951",
         "type": "modbus-client",
         "name": "Omron PLC",
@@ -1637,7 +1711,7 @@
         "stateLogEnabled": false,
         "queueLogEnabled": false,
         "failureLogEnabled": true,
-        "tcpHost": "10.20.20.6",
+        "tcpHost": "192.168.2.240",
         "tcpPort": 502,
         "tcpType": "DEFAULT",
         "serialPort": "/dev/ttyUSB",
@@ -1733,7 +1807,7 @@
         "hidden": false
     },
     {
-        "id": "f772fb28cebd66d2",
+        "id": "dd036b0df14872cb",
         "type": "global-config",
         "env": [],
         "modules": {
