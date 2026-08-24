@@ -23,6 +23,13 @@ Node-RED SCADA Server -> Omron PLC -> (Transmitter, E-Stop Button, Safety Reset 
 * NEMA 17 Motor (x2)
 * SCADA Server (PC)
 
+## IP Configuration
+
+| Device | IP Address | Subnet Mask | Gateway | Connection Method | How to Configure |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| SCADA Server (Host Server) | 10.20.20.5 | 255.255.255.0 | 10.20.20.1 | Wireless to Company Wifi | Set from Server |
+| Omron CP2E PLC | 10.20.20.6 | 255.255.255.0 | 10.20.20.1 | Wired to Ethernet Switch | CX-Programmer -> Settings -> Built-in Ethernet -> Set Static IP |
+
 ## Wiring Table
 
 ### 1. Power
@@ -133,3 +140,16 @@ Node-RED SCADA Server -> Omron PLC -> (Transmitter, E-Stop Button, Safety Reset 
 1. Ensure the E-Stop is pressed or all motors are commanded to a full stop via the Node-RED dashboard.
 2. Unplug the AC Power Cable to de-energize the Mean Well PSU, safely cutting power to the PLC, drivers, and sensors simultaneously.
 3. Stop Node-RED on the SCADA Server.
+
+## Maintenance & Restore to Baseline (Penetration Testing)
+Since this system is used for penetration testing, components may be compromised, misconfigured, or crashed. Use the following procedures to restore the system to a clean baseline.
+
+### 1. Omron CP2E PLC (via CX-Programmer)
+* **Maintenance**: Regularly back up the `.cxp` project file before testing. Verify that the physical Safety Reset button is functioning correctly.
+* **Restore to Baseline**:
+  1. Connect your secure laptop to the Omron PLC via Ethernet or USB.
+  2. Open the clean `OmronSCADA_CXProgrammer.cxp` project in CX-Programmer.
+  3. Go Online with the PLC (Ctrl+W).
+  4. Switch the PLC to PROGRAM mode to halt execution.
+  5. Download the clean program to the PLC (Program > Transfer > To PLC).
+  6. Switch back to RUN/MONITOR mode. This purges any rogue ladder logic or manipulated memory states injected by attackers.

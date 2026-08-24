@@ -211,3 +211,30 @@ Laptop SCADA Server (Node-RED) -> Ethernet Hub & Wi-Fi Extender -> RTU 1 (Raspbe
 3. Unplug the 12V DC Adapter (Raspberry Pi & Motor Driver power).
 4. Unplug the 5V DC Adapter (ESP8266 power).
 5. Stop Node-RED and OpenPLC Runtime on the SCADA Server.
+
+## Maintenance & Restore to Baseline (Penetration Testing)
+Since this system is used for penetration testing, components may be compromised, misconfigured, or crashed. Use the following procedures to restore the system to a clean baseline.
+
+### 1. Raspberry Pi (RTU 1)
+* **Maintenance**: Periodically check the systemd service logs using `sudo journalctl -u scada_rtu.service -f` to monitor for anomalies.
+* **Restore to Baseline**: 
+  1. SSH into the Pi or connect a monitor/keyboard.
+  2. Stop the service: `sudo systemctl stop scada_rtu.service`.
+  3. Overwrite the compromised script with the clean original: Replace `/home/pi/rtu_terminal.py` with the `rtu_terminal.py` from this repository.
+  4. Restart the service: `sudo systemctl start scada_rtu.service`.
+  5. *(Severe Compromise)*: Reflash the microSD card with a clean Raspberry Pi OS image and repeat the initial setup steps.
+
+### 2. ESP8266 (RTU 2)
+* **Maintenance**: Ensure the 5V power supply is stable. Unplug and replug if the ESP stops broadcasting to the network.
+* **Restore to Baseline**:
+  1. Open PlatformIO via VSCode on your secure laptop.
+  2. Connect the ESP8266 directly via USB.
+  3. Reflash the board using the clean `esp8266Program.cpp` (renamed to `main.cpp`). This will overwrite any malicious firmware or rogue configurations injected during testing.
+
+### 3. Virtual PLC (OpenPLC)
+* **Maintenance**: Monitor the OpenPLC runtime logs in the dashboard for unauthorized login attempts or modified logic blocks.
+* **Restore to Baseline**:
+  1. Open the OpenPLC Editor on the SCADA server.
+  2. Load the original unzipped `OpenPLC` project folder.
+  3. Re-compile and download the clean `.st` logic to the OpenPLC Runtime to overwrite any manipulated PLC logic.
+  4. Reset the OpenPLC runtime password if it was compromised.
