@@ -19,6 +19,16 @@ Laptop SCADA Server (Node-RED) -> Ethernet Hub & Wi-Fi Extender -> RTU 1 (Raspbe
 * XB7 Push Button
 * DS18B20 Temp Sensor
 
+## IP Configuration
+
+| Device | IP Address | Subnet Mask | Gateway | Connection Method | How to Configure |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| SCADA Laptop (Host Server) | 192.168.2.200 | 255.255.254.0 | 192.168.2.1 | Wireless to Company Wifi | Win + R -> `ncpa.cpl` -> Wi-Fi IPv4 Configurations |
+| SCADA Laptop (Ethernet) | 192.168.2.210 | 255.255.255.0 | 192.168.2.1 | Wired to Ethernet Switch | Win + R -> `ncpa.cpl` -> Ethernet IPv4 Configurations |
+| Raspberry Pi (RTU 1) | 192.168.2.220 | 255.255.255.0 | 192.168.2.1 | Wired to Ethernet Switch | Terminal -> `sudo nmtui` -> Edit connection -> Set static IPv4 for eth0 |
+| ESP8266 D1 Mini (RTU 2) | 192.168.2.230 | 255.255.255.0 | 192.168.2.1 | Wireless via Arduino Firmware Code | Arduino IDE -> Add `WiFi.config(ip, gateway, subnet)` inside `setup()` |
+| TP-Link Wifi Extender | 192.168.2.240 | 255.255.254.0 | 192.168.2.1 | Wireless Repeater Mode | Browser -> tplinkrepeater.net (or Admin IP) -> Settings -> Network -> LAN -> Set Static IP |
+
 ## Wiring Table
 
 ### 1. Power
@@ -72,8 +82,41 @@ Laptop SCADA Server (Node-RED) -> Ethernet Hub & Wi-Fi Extender -> RTU 1 (Raspbe
    sudo apt install python3 python3-pip
    pip3 install pymodbus RPi.GPIO asyncio
    ```
-3. **Transfer Code**: Copy `raspiProgram.py` to the Raspberry Pi (e.g., `/home/pi/`).
-4. **Run Script**: Execute the script via terminal: `python3 /home/pi/raspiProgram.py`.
+3. **Transfer Code**: Copy `rtu_terminal.py` to the Raspberry Pi (e.g., `/home/pi/`).
+4. **Run Script**: Execute the script via terminal: `python3 /home/pi/rtu_terminal.py`.
+
+#### How to Setup Raspberry Program to Run on Boot
+1. Create a new service file:
+   ```bash
+   sudo nano /etc/systemd/system/scada_rtu.service
+   ```
+2. Paste the following configuration:
+   ```ini
+   [Unit]
+   Description=SCADA RTU Raspberry Pi Service
+   After=network-online.target
+   Wants=network-online.target
+
+   [Service]
+   Type=simple
+   ExecStart=/usr/bin/python3 /home/pi/rtu_terminal.py
+   WorkingDirectory=/home/pi
+   Environment=PYTHONPATH=/home/pi/.local/lib/python3.13/site-packages
+   StandardOutput=journal
+   StandardError=journal
+   Restart=always
+   RestartSec=5
+   User=root
+
+   [Install]
+   WantedBy=multi-user.target
+   ```
+3. Reload systemd, enable, and start the service:
+   ```bash
+   sudo systemctl daemon-reload
+   sudo systemctl enable scada_rtu.service
+   sudo systemctl start scada_rtu.service
+   ```
 
 ### 2. RTU 2: ESP8266
 1. **Install Arduino IDE**: Download and install the Arduino IDE on your development laptop.
@@ -95,5 +138,7 @@ Laptop SCADA Server (Node-RED) -> Ethernet Hub & Wi-Fi Extender -> RTU 1 (Raspbe
 2. **Import Flow**: 
    - Go to `http://localhost:1880`.
    - Menu > Import, then select `node-REDFlow.json` from the `Raspberry System` directory.
-3. **Configure Network**: Ensure Node-RED Modbus nodes match the static IPs of the Raspberry Pi (`192.168.2.220`) and ESP8266 (`192.168.2.230`).
+3. **Configure Network**: 
+   - Ensure OpenPLC runtime matches the static IPs of the Raspberry Pi (`192.168.2.220`) and ESP8266 (`192.168.2.230`).
+   - The Node-RED setup needs to follow the OpenPLC IP, which in this case is the local computer (`127.0.0.1`).
 4. **Deploy**: Click the Deploy button.
