@@ -92,8 +92,9 @@ Node-RED SCADA Server -> Omron PLC -> (Transmitter, E-Stop Button, Safety Reset 
 | Coil (0x) | 17 | Motor 2 Enable Command |
 | Coil (0x) | 18 | Motor 1 Direction Command |
 | Coil (0x) | 19 | Motor 2 Direction Command |
-| Holding Register (4x) | 100 | Motor 1 Speed Feedback (RPM) |
-| Holding Register (4x) | 101 | Motor 2 Speed Feedback (RPM) |
+| Coil (0x) | 20 | Motor 2 Field Override Badge |
+| Holding Register (4x) | 100 | Motor 1 Speed Command (RPM) |
+| Holding Register (4x) | 101 | Motor 2 Speed Command (RPM) |
 | Holding Register (4x) | 1024 | Temperature Raw (x100 °C) |
 | Holding Register (4x) | 1025 | Speed Control Setpoint |
 | Holding Register (4x) | 1026 | Calculated Thermal Auto-Speed |
