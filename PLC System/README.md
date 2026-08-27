@@ -111,25 +111,25 @@ The Modbus addresses map directly to the internal memory areas in the Omron CP2E
     *   *Example:* `D100` is Holding Register `100`.
     *   *Example:* `D1024` is Holding Register `1024`.
 
-| Register Type | Address | Data Description |
-| :--- | :--- | :--- |
-| Coil (0x) | 1 | E-Stop Command |
-| Coil (0x) | 2 | Safety Reset Command |
-| Coil (0x) | 3 | Physical Field E-Stop Status |
-| Coil (0x) | 4 | Master Safety Latch Bit |
-| Coil (0x) | 5 | Motor 1 Running Status |
-| Coil (0x) | 6 | Motor 2 Running Status |
-| Coil (0x) | 7 | Field Button Status |
-| Coil (0x) | 16 | Motor 1 Enable Command |
-| Coil (0x) | 17 | Motor 2 Enable Command |
-| Coil (0x) | 18 | Motor 1 Direction Command |
-| Coil (0x) | 19 | Motor 2 Direction Command |
-| Coil (0x) | 20 | Motor 2 Field Override Badge |
-| Holding Register (4x) | 100 | Motor 1 Speed Command (RPM) |
-| Holding Register (4x) | 101 | Motor 2 Speed Command (RPM) |
-| Holding Register (4x) | 1024 | Temperature Raw (x100 °C) |
-| Holding Register (4x) | 1025 | Speed Control Setpoint |
-| Holding Register (4x) | 1026 | Calculated Thermal Auto-Speed |
+| Register Type | Modbus Address | Omron PLC Address | Data Description & PLC Function |
+| :--- | :--- | :--- | :--- |
+| Coil (0x) | 1 | W0.01 | **HMI_E_Stop**: Triggers the emergency stop from the Node-RED dashboard, halting motors. |
+| Coil (0x) | 2 | W0.02 | **HMI_Reset**: Clears the Master Safety Lockout Latch from Node-RED after an E-Stop. |
+| Coil (0x) | 3 | W0.03 | **Field_E_Stop_Status**: Reads the state of the physical red XB2 mushroom E-Stop button. |
+| Coil (0x) | 4 | W0.04 | **Safety_Latch**: The master lockout bit; if TRUE, motors cannot spin until reset. |
+| Coil (0x) | 5 | W0.05 | **Motor1_Status**: Feedback bit indicating Motor 1 is actively running (for HMI LED). |
+| Coil (0x) | 6 | W0.06 | **Motor2_Status**: Feedback bit indicating Motor 2 is actively running (for HMI LED). |
+| Coil (0x) | 7 | W0.07 | **HMI_Button**: Feedback bit indicating Motor 1 was toggled by the physical field button. |
+| Coil (0x) | 16 | W1.00 | **HMI_Motor1_Enable**: Command from Node-RED to turn on Motor 1. |
+| Coil (0x) | 17 | W1.01 | **HMI_Motor2_Enable**: Command from Node-RED to turn on Motor 2. |
+| Coil (0x) | 18 | W1.02 | **HMI_Motor1_Dir**: Command from Node-RED to set Motor 1 direction (FWD/REV). |
+| Coil (0x) | 19 | W1.03 | **HMI_Motor2_Dir**: Command from Node-RED to set Motor 2 direction (FWD/REV). |
+| Coil (0x) | 20 | W1.04 | **HMI_Motor2_Button**: Feedback bit indicating Motor 2 was toggled by the physical field button. |
+| Holding Reg (4x) | 100 | D100 | **Motor1_Speed**: Final calculated speed sent to TB6600 Driver 1 (pulse output). |
+| Holding Reg (4x) | 101 | D101 | **Motor2_Speed**: Final calculated speed sent to TB6600 Driver 2 (pulse output). |
+| Holding Reg (4x) | 1024 | D1024 | **Raw_Temp**: Raw analog temperature data read from the CP1W-ADB21 PT100 board. |
+| Holding Reg (4x) | 1025 | D1025 | **HMI_Motor1_Cmd**: The speed setpoint commanded from the Node-RED HMI slider. |
+| Holding Reg (4x) | 1026 | D1026 | **HMI_Motor2_Cmd**: The auto-calculated thermal cooling speed for Motor 2. |
 
 ## Software Setup & Execution Walkthrough
 
