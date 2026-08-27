@@ -51,8 +51,8 @@ Node-RED SCADA Server -> Omron PLC -> (Transmitter, E-Stop Button, Safety Reset 
 | GND Bus Bar | Terminal | TB6600 Driver 1 | GND |
 | VCC Bus Bar | Terminal | TB6600 Driver 2 | VCC |
 | GND Bus Bar | Terminal | TB6600 Driver 2 | GND |
-| VCC Bus Bar | Terminal | TB6600 Driver 1 | PUL+ & DIR+ |
-| VCC Bus Bar | Terminal | TB6600 Driver 2 | PUL+ & DIR+ |
+| VCC Bus Bar | Terminal | TB6600 Driver 1 | PUL+(Pulse) & DIR+(Direction) |
+| VCC Bus Bar | Terminal | TB6600 Driver 2 | PUL+(Pulse) & DIR+(Direction) |
 
 ### 2. Signal & Communication
 | SOURCE COMPONENT | SOURCE TERMINAL | DESTINATION COMPONENT | DESTINATION TERMINAL |
@@ -63,12 +63,12 @@ Node-RED SCADA Server -> Omron PLC -> (Transmitter, E-Stop Button, Safety Reset 
 | XB2BS542C Emergency Button | Terminal 12 (NC Output) | Omron CP2E PLC | Input 0.01 |
 | PT100 Sensor Probe | 3-Wire Leads Blue-Blue, Red | PT100 Transmitter | RTD / PT100 Terminals |
 | PT100 Transmitter | Bottom-left Terminal (Signal) | CP1W-ADB21 Option Board | Vin 1 |
-| Omron CP2E PLC | Output 0.00 (Transistor PTO) | TB6600 Driver 1 | PUL- |
-| Omron CP2E PLC | Output 0.02 (Transistor PTO) | TB6600 Driver 1 | DIR- |
-| Omron CP2E PLC | Output 0.01 (Transistor PTO) | TB6600 Driver 2 | PUL- |
-| Omron CP2E PLC | Output 0.03 (Transistor PTO) | TB6600 Driver 2 | DIR- |
-| TB6600 Driver 1 | A+ / A- / B+ / B- | NEMA 17 Motor 1 | Black / Green / Red / Blue Wire |
-| TB6600 Driver 2 | A+ / A- / B+ / B- | NEMA 17 Motor 2 | Black / Green / Red / Blue Wire |
+| Omron CP2E PLC | Output 0.00 (Transistor PTO) | TB6600 Driver 1 | PUL-(Pulse) |
+| Omron CP2E PLC | Output 0.02 (Transistor PTO) | TB6600 Driver 1 | DIR-(Direction) |
+| Omron CP2E PLC | Output 0.01 (Transistor PTO) | TB6600 Driver 2 | PUL-(Pulse) |
+| Omron CP2E PLC | Output 0.03 (Transistor PTO) | TB6600 Driver 2 | DIR-(Direction) |
+| TB6600 Driver 1 | A+ / A- / B+ / B- | NEMA 17 Motor 1 | Black(A+) / Green(A-) / Red(B+) / Blue(B-) Wire |
+| TB6600 Driver 2 | A+ / A- / B+ / B- | NEMA 17 Motor 2 | Black(A+) / Green(A-) / Red(B+) / Blue(B-) Wire |
 | Omron CP2E PLC | COM (Output) | Omron CP2E PLC | 2x COM (Output) |
 | SCADA Server (PC) | Ethernet Port (RJ45) | Omron CP2E PLC | Ethernet Port (RJ45) |
 
@@ -76,6 +76,23 @@ Node-RED SCADA Server -> Omron PLC -> (Transmitter, E-Stop Button, Safety Reset 
 For both TB6600 drivers, the DIP switches (SW1-SW6) are set to: **OFF - ON - OFF - ON - ON - OFF**.
 - **SW1 to SW3 (OFF, ON, OFF)**: Sets Microstep to **8** and Pulse/rev to **1600**. This gives a good balance of high precision and smooth rotation without exceeding the PLC's high-speed pulse output limit.
 - **SW4 to SW6 (ON, ON, OFF)**: Sets output Current to **1.5A** and Peak Current to **1.7A**. This safely matches the NEMA 17 motor's current rating, providing maximum torque without overheating or damaging the motor coils.
+
+### 4. PT100 Transmitter Wiring
+![PT100 Transmitter Wiring Diagram](transmitter.png)
+
+The PT100 temperature transmitter requires careful wiring to ensure accurate analog readings at the PLC.
+
+**1. PT100 Sensor Probe (Input to Transmitter - Bottom Terminals):**
+*   **Red Wire:** Connects to the **bottom-right terminal**.
+*   **Blue Wires (Both):** Connect to the **bottom-middle terminal**.
+
+**2. Power Supply (Power to Transmitter - Top Terminals):**
+*   **24V+ (VCC):** Connects from the VCC Bus Bar (24V DC) to the **top-right terminal**.
+*   **0V (GND):** Connects from the GND Bus Bar to the **top-left terminal**.
+
+**3. Analog Signal (Output to PLC Option Board):**
+*   **Signal Output (0-10V):** Connects from the **bottom-left terminal** to the **Vin 1** terminal on the **Omron CP1W-ADB21 Option Board**.
+*   **Signal Ground (COM):** Connects from the **top-left terminal** (GND) to the **COM** terminal on the **GND Bus Bar** to complete the analog circuit loop.
 
 ## Protocols & Data Mapping
 
