@@ -67,10 +67,15 @@ Node-RED SCADA Server -> Omron PLC -> (Transmitter, E-Stop Button, Safety Reset 
 | Omron CP2E PLC | Output 0.02 (Transistor PTO) | TB6600 Driver 1 | DIR- |
 | Omron CP2E PLC | Output 0.01 (Transistor PTO) | TB6600 Driver 2 | PUL- |
 | Omron CP2E PLC | Output 0.03 (Transistor PTO) | TB6600 Driver 2 | DIR- |
-| TB6600 Driver 1 | A+ / A- / B+ / B- | NEMA 17 Motor 1 | 4-Wire Leads |
-| TB6600 Driver 2 | A+ / A- / B+ / B- | NEMA 17 Motor 2 | 4-Wire Leads |
+| TB6600 Driver 1 | A+ / A- / B+ / B- | NEMA 17 Motor 1 | Black / Green / Red / Blue Wire |
+| TB6600 Driver 2 | A+ / A- / B+ / B- | NEMA 17 Motor 2 | Black / Green / Red / Blue Wire |
 | Omron CP2E PLC | COM (Output) | Omron CP2E PLC | 2x COM (Output) |
 | SCADA Server (PC) | Ethernet Port (RJ45) | Omron CP2E PLC | Ethernet Port (RJ45) |
+
+### 3. TB6600 Driver Configuration
+For both TB6600 drivers, the DIP switches (SW1-SW6) are set to: **OFF - ON - OFF - ON - ON - OFF**.
+- **SW1 to SW3 (OFF, ON, OFF)**: Sets Microstep to **8** and Pulse/rev to **1600**. This gives a good balance of high precision and smooth rotation without exceeding the PLC's high-speed pulse output limit.
+- **SW4 to SW6 (ON, ON, OFF)**: Sets output Current to **1.5A** and Peak Current to **1.7A**. This safely matches the NEMA 17 motor's current rating, providing maximum torque without overheating or damaging the motor coils.
 
 ## Protocols & Data Mapping
 
