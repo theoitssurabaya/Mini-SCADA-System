@@ -185,7 +185,13 @@ Laptop SCADA Server (Node-RED) -> Ethernet Hub & Wi-Fi Extender -> RTU 1 (Raspbe
 3. **Configure Network**: 
    - Ensure OpenPLC runtime matches the static IPs of the Raspberry Pi (`192.168.2.220`) and ESP8266 (`192.168.2.230`).
    - The Node-RED setup needs to follow the OpenPLC IP, which in this case is the local computer (`127.0.0.1`).
-4. **Deploy**: Click the Deploy button.
+4. **Modbus Function Codes (FC) Used in Node-RED**:
+   - **FC 1 (Read Coils)**: Reads boolean bits (e.g., checking if motor is enabled or safety is locked).
+   - **FC 2 (Read Discrete Inputs)**: Reads read-only boolean bits (e.g., physical push button state).
+   - **FC 3 (Read Holding Registers)**: Reads integer/analog values (e.g., reading temperature or motor speed).
+   - **FC 5 (Force Single Coil)**: Writes a single boolean bit (e.g., sending E-Stop or motor toggle command).
+   - **FC 6 (Preset Single Register)**: Writes a single integer value (e.g., sending motor speed command).
+5. **Deploy**: Click the Deploy button.
 
 ## System Operation Walkthrough
 

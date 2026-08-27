@@ -101,6 +101,16 @@ The PT100 temperature transmitter requires careful wiring to ensure accurate ana
 * **SCADA Server (Node-RED)**: HTTP Web Server (Port 1880)
 
 ### 2. Modbus Register Mapping
+
+The Modbus addresses map directly to the internal memory areas in the Omron CP2E PLC (configured in CX-Programmer):
+*   **Coils (0x) map to W (Work Area) Bits:** The formula is `(Word Number × 16) + Bit Number = Modbus Coil`.
+    *   *Example:* `W0.01` is Coil `1` `(0 × 16 + 1)`.
+    *   *Example:* `W1.00` is Coil `16` `(1 × 16 + 0)`.
+    *   *Example:* `W1.04` is Coil `20` `(1 × 16 + 4)`.
+*   **Holding Registers (4x) map to D (Data) Registers:** The address is a direct 1-to-1 match.
+    *   *Example:* `D100` is Holding Register `100`.
+    *   *Example:* `D1024` is Holding Register `1024`.
+
 | Register Type | Address | Data Description |
 | :--- | :--- | :--- |
 | Coil (0x) | 1 | E-Stop Command |
@@ -141,7 +151,12 @@ The PT100 temperature transmitter requires careful wiring to ensure accurate ana
    - Select `node-REDFlow.json` from the `PLC System` directory.
    - Click Import.
 3. **Configure Nodes**: Update the Modbus nodes within the flow to point to the Omron PLC's IP address.
-4. **Deploy**: Click the Deploy button to apply the changes and start the SCADA interface.
+4. **Modbus Function Codes (FC) Used in Node-RED**:
+   - **FC 1 (Read Coils)**: Reads boolean bits (e.g., checking if motor is running or button is pressed).
+   - **FC 3 (Read Holding Registers)**: Reads integer/analog values (e.g., reading PT100 temperature).
+   - **FC 5 (Force Single Coil)**: Writes a single boolean bit (e.g., sending E-Stop or motor toggle command).
+   - **FC 6 (Preset Single Register)**: Writes a single integer value (e.g., sending motor speed command).
+5. **Deploy**: Click the Deploy button to apply the changes and start the SCADA interface.
 
 ## System Operation Walkthrough
 
